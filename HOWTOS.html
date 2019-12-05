@@ -1,0 +1,4346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="generator" content="AsciiDoc 8.6.9">
+<title>Harry&#8217;s HOWTOs</title>
+<style type="text/css">
+/* Shared CSS for AsciiDoc xhtml11 and html5 backends */
+
+/* Default font. */
+body {
+  font-family: Georgia,serif;
+}
+
+/* Title font. */
+h1, h2, h3, h4, h5, h6,
+div.title, caption.title,
+thead, p.table.header,
+#toctitle,
+#author, #revnumber, #revdate, #revremark,
+#footer {
+  font-family: Arial,Helvetica,sans-serif;
+}
+
+body {
+  margin: 1em 5% 1em 5%;
+}
+
+a {
+  color: blue;
+  text-decoration: underline;
+}
+a:visited {
+  color: fuchsia;
+}
+
+em {
+  font-style: italic;
+  color: navy;
+}
+
+strong {
+  font-weight: bold;
+  color: #083194;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #527bbd;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+
+h1, h2, h3 {
+  border-bottom: 2px solid silver;
+}
+h2 {
+  padding-top: 0.5em;
+}
+h3 {
+  float: left;
+}
+h3 + * {
+  clear: left;
+}
+h5 {
+  font-size: 1.0em;
+}
+
+div.sectionbody {
+  margin-left: 0;
+}
+
+hr {
+  border: 1px solid silver;
+}
+
+p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+ul, ol, li > p {
+  margin-top: 0;
+}
+ul > li     { color: #aaa; }
+ul > li > * { color: black; }
+
+.monospaced, code, pre {
+  font-family: "Courier New", Courier, monospace;
+  font-size: inherit;
+  color: navy;
+  padding: 0;
+  margin: 0;
+}
+pre {
+  white-space: pre-wrap;
+}
+
+#author {
+  color: #527bbd;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+#email {
+}
+#revnumber, #revdate, #revremark {
+}
+
+#footer {
+  font-size: small;
+  border-top: 2px solid silver;
+  padding-top: 0.5em;
+  margin-top: 4.0em;
+}
+#footer-text {
+  float: left;
+  padding-bottom: 0.5em;
+}
+#footer-badges {
+  float: right;
+  padding-bottom: 0.5em;
+}
+
+#preamble {
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
+div.imageblock, div.exampleblock, div.verseblock,
+div.quoteblock, div.literalblock, div.listingblock, div.sidebarblock,
+div.admonitionblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+div.admonitionblock {
+  margin-top: 2.0em;
+  margin-bottom: 2.0em;
+  margin-right: 10%;
+  color: #606060;
+}
+
+div.content { /* Block element content. */
+  padding: 0;
+}
+
+/* Block element titles. */
+div.title, caption.title {
+  color: #527bbd;
+  font-weight: bold;
+  text-align: left;
+  margin-top: 1.0em;
+  margin-bottom: 0.5em;
+}
+div.title + * {
+  margin-top: 0;
+}
+
+td div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content + div.title {
+  margin-top: 0.0em;
+}
+
+div.sidebarblock > div.content {
+  background: #ffffee;
+  border: 1px solid #dddddd;
+  border-left: 4px solid #f0f0f0;
+  padding: 0.5em;
+}
+
+div.listingblock > div.content {
+  border: 1px solid #dddddd;
+  border-left: 5px solid #f0f0f0;
+  background: #f8f8f8;
+  padding: 0.5em;
+}
+
+div.quoteblock, div.verseblock {
+  padding-left: 1.0em;
+  margin-left: 1.0em;
+  margin-right: 10%;
+  border-left: 5px solid #f0f0f0;
+  color: #888;
+}
+
+div.quoteblock > div.attribution {
+  padding-top: 0.5em;
+  text-align: right;
+}
+
+div.verseblock > pre.content {
+  font-family: inherit;
+  font-size: inherit;
+}
+div.verseblock > div.attribution {
+  padding-top: 0.75em;
+  text-align: left;
+}
+/* DEPRECATED: Pre version 8.2.7 verse style literal block. */
+div.verseblock + div.attribution {
+  text-align: left;
+}
+
+div.admonitionblock .icon {
+  vertical-align: top;
+  font-size: 1.1em;
+  font-weight: bold;
+  text-decoration: underline;
+  color: #527bbd;
+  padding-right: 0.5em;
+}
+div.admonitionblock td.content {
+  padding-left: 0.5em;
+  border-left: 3px solid #dddddd;
+}
+
+div.exampleblock > div.content {
+  border-left: 3px solid #dddddd;
+  padding-left: 0.5em;
+}
+
+div.imageblock div.content { padding-left: 0; }
+span.image img { border-style: none; vertical-align: text-bottom; }
+a.image:visited { color: white; }
+
+dl {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+dt {
+  margin-top: 0.5em;
+  margin-bottom: 0;
+  font-style: normal;
+  color: navy;
+}
+dd > *:first-child {
+  margin-top: 0.1em;
+}
+
+ul, ol {
+    list-style-position: outside;
+}
+ol.arabic {
+  list-style-type: decimal;
+}
+ol.loweralpha {
+  list-style-type: lower-alpha;
+}
+ol.upperalpha {
+  list-style-type: upper-alpha;
+}
+ol.lowerroman {
+  list-style-type: lower-roman;
+}
+ol.upperroman {
+  list-style-type: upper-roman;
+}
+
+div.compact ul, div.compact ol,
+div.compact p, div.compact p,
+div.compact div, div.compact div {
+  margin-top: 0.1em;
+  margin-bottom: 0.1em;
+}
+
+tfoot {
+  font-weight: bold;
+}
+td > div.verse {
+  white-space: pre;
+}
+
+div.hdlist {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+div.hdlist tr {
+  padding-bottom: 15px;
+}
+dt.hdlist1.strong, td.hdlist1.strong {
+  font-weight: bold;
+}
+td.hdlist1 {
+  vertical-align: top;
+  font-style: normal;
+  padding-right: 0.8em;
+  color: navy;
+}
+td.hdlist2 {
+  vertical-align: top;
+}
+div.hdlist.compact tr {
+  margin: 0;
+  padding-bottom: 0;
+}
+
+.comment {
+  background: yellow;
+}
+
+.footnote, .footnoteref {
+  font-size: 0.8em;
+}
+
+span.footnote, span.footnoteref {
+  vertical-align: super;
+}
+
+#footnotes {
+  margin: 20px 0 20px 0;
+  padding: 7px 0 0 0;
+}
+
+#footnotes div.footnote {
+  margin: 0 0 5px 0;
+}
+
+#footnotes hr {
+  border: none;
+  border-top: 1px solid silver;
+  height: 1px;
+  text-align: left;
+  margin-left: 0;
+  width: 20%;
+  min-width: 100px;
+}
+
+div.colist td {
+  padding-right: 0.5em;
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+div.colist td img {
+  margin-top: 0.3em;
+}
+
+@media print {
+  #footer-badges { display: none; }
+}
+
+#toc {
+  margin-bottom: 2.5em;
+}
+
+#toctitle {
+  color: #527bbd;
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-top: 1.0em;
+  margin-bottom: 0.1em;
+}
+
+div.toclevel0, div.toclevel1, div.toclevel2, div.toclevel3, div.toclevel4 {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+div.toclevel2 {
+  margin-left: 2em;
+  font-size: 0.9em;
+}
+div.toclevel3 {
+  margin-left: 4em;
+  font-size: 0.9em;
+}
+div.toclevel4 {
+  margin-left: 6em;
+  font-size: 0.9em;
+}
+
+span.aqua { color: aqua; }
+span.black { color: black; }
+span.blue { color: blue; }
+span.fuchsia { color: fuchsia; }
+span.gray { color: gray; }
+span.green { color: green; }
+span.lime { color: lime; }
+span.maroon { color: maroon; }
+span.navy { color: navy; }
+span.olive { color: olive; }
+span.purple { color: purple; }
+span.red { color: red; }
+span.silver { color: silver; }
+span.teal { color: teal; }
+span.white { color: white; }
+span.yellow { color: yellow; }
+
+span.aqua-background { background: aqua; }
+span.black-background { background: black; }
+span.blue-background { background: blue; }
+span.fuchsia-background { background: fuchsia; }
+span.gray-background { background: gray; }
+span.green-background { background: green; }
+span.lime-background { background: lime; }
+span.maroon-background { background: maroon; }
+span.navy-background { background: navy; }
+span.olive-background { background: olive; }
+span.purple-background { background: purple; }
+span.red-background { background: red; }
+span.silver-background { background: silver; }
+span.teal-background { background: teal; }
+span.white-background { background: white; }
+span.yellow-background { background: yellow; }
+
+span.big { font-size: 2em; }
+span.small { font-size: 0.6em; }
+
+span.underline { text-decoration: underline; }
+span.overline { text-decoration: overline; }
+span.line-through { text-decoration: line-through; }
+
+div.unbreakable { page-break-inside: avoid; }
+
+
+/*
+ * xhtml11 specific
+ *
+ * */
+
+div.tableblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+div.tableblock > table {
+  border: 3px solid #527bbd;
+}
+thead, p.table.header {
+  font-weight: bold;
+  color: #527bbd;
+}
+p.table {
+  margin-top: 0;
+}
+/* Because the table frame attribute is overriden by CSS in most browsers. */
+div.tableblock > table[frame="void"] {
+  border-style: none;
+}
+div.tableblock > table[frame="hsides"] {
+  border-left-style: none;
+  border-right-style: none;
+}
+div.tableblock > table[frame="vsides"] {
+  border-top-style: none;
+  border-bottom-style: none;
+}
+
+
+/*
+ * html5 specific
+ *
+ * */
+
+table.tableblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+thead, p.tableblock.header {
+  font-weight: bold;
+  color: #527bbd;
+}
+p.tableblock {
+  margin-top: 0;
+}
+table.tableblock {
+  border-width: 3px;
+  border-spacing: 0px;
+  border-style: solid;
+  border-color: #527bbd;
+  border-collapse: collapse;
+}
+th.tableblock, td.tableblock {
+  border-width: 1px;
+  padding: 4px;
+  border-style: solid;
+  border-color: #527bbd;
+}
+
+table.tableblock.frame-topbot {
+  border-left-style: hidden;
+  border-right-style: hidden;
+}
+table.tableblock.frame-sides {
+  border-top-style: hidden;
+  border-bottom-style: hidden;
+}
+table.tableblock.frame-none {
+  border-style: hidden;
+}
+
+th.tableblock.halign-left, td.tableblock.halign-left {
+  text-align: left;
+}
+th.tableblock.halign-center, td.tableblock.halign-center {
+  text-align: center;
+}
+th.tableblock.halign-right, td.tableblock.halign-right {
+  text-align: right;
+}
+
+th.tableblock.valign-top, td.tableblock.valign-top {
+  vertical-align: top;
+}
+th.tableblock.valign-middle, td.tableblock.valign-middle {
+  vertical-align: middle;
+}
+th.tableblock.valign-bottom, td.tableblock.valign-bottom {
+  vertical-align: bottom;
+}
+
+
+/*
+ * manpage specific
+ *
+ * */
+
+body.manpage h1 {
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  border-top: 2px solid silver;
+  border-bottom: 2px solid silver;
+}
+body.manpage h2 {
+  border-style: none;
+}
+body.manpage div.sectionbody {
+  margin-left: 3em;
+}
+
+@media print {
+  body.manpage div#toc { display: none; }
+}
+
+
+@media screen {
+  body {
+    max-width: 50em; /* approximately 80 characters wide */
+    margin-left: 16em;
+  }
+
+  #toc {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 13em;
+    padding: 0.5em;
+    padding-bottom: 1.5em;
+    margin: 0;
+    overflow: auto;
+    border-right: 3px solid #f8f8f8;
+    background-color: white;
+  }
+
+  #toc .toclevel1 {
+    margin-top: 0.5em;
+  }
+
+  #toc .toclevel2 {
+    margin-top: 0.25em;
+    display: list-item;
+    color: #aaaaaa;
+  }
+
+  #toctitle {
+    margin-top: 0.5em;
+  }
+}
+</style>
+<script type="text/javascript">
+/*<![CDATA[*/
+var asciidoc = {  // Namespace.
+
+/////////////////////////////////////////////////////////////////////
+// Table Of Contents generator
+/////////////////////////////////////////////////////////////////////
+
+/* Author: Mihai Bazon, September 2002
+ * http://students.infoiasi.ro/~mishoo
+ *
+ * Table Of Content generator
+ * Version: 0.4
+ *
+ * Feel free to use this script under the terms of the GNU General Public
+ * License, as long as you do not remove or alter this notice.
+ */
+
+ /* modified by Troy D. Hanson, September 2006. License: GPL */
+ /* modified by Stuart Rackham, 2006, 2009. License: GPL */
+
+// toclevels = 1..4.
+toc: function (toclevels) {
+
+  function getText(el) {
+    var text = "";
+    for (var i = el.firstChild; i != null; i = i.nextSibling) {
+      if (i.nodeType == 3 /* Node.TEXT_NODE */) // IE doesn't speak constants.
+        text += i.data;
+      else if (i.firstChild != null)
+        text += getText(i);
+    }
+    return text;
+  }
+
+  function TocEntry(el, text, toclevel) {
+    this.element = el;
+    this.text = text;
+    this.toclevel = toclevel;
+  }
+
+  function tocEntries(el, toclevels) {
+    var result = new Array;
+    var re = new RegExp('[hH]([1-'+(toclevels+1)+'])');
+    // Function that scans the DOM tree for header elements (the DOM2
+    // nodeIterator API would be a better technique but not supported by all
+    // browsers).
+    var iterate = function (el) {
+      for (var i = el.firstChild; i != null; i = i.nextSibling) {
+        if (i.nodeType == 1 /* Node.ELEMENT_NODE */) {
+          var mo = re.exec(i.tagName);
+          if (mo && (i.getAttribute("class") || i.getAttribute("className")) != "float") {
+            result[result.length] = new TocEntry(i, getText(i), mo[1]-1);
+          }
+          iterate(i);
+        }
+      }
+    }
+    iterate(el);
+    return result;
+  }
+
+  var toc = document.getElementById("toc");
+  if (!toc) {
+    return;
+  }
+
+  // Delete existing TOC entries in case we're reloading the TOC.
+  var tocEntriesToRemove = [];
+  var i;
+  for (i = 0; i < toc.childNodes.length; i++) {
+    var entry = toc.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div'
+     && entry.getAttribute("class")
+     && entry.getAttribute("class").match(/^toclevel/))
+      tocEntriesToRemove.push(entry);
+  }
+  for (i = 0; i < tocEntriesToRemove.length; i++) {
+    toc.removeChild(tocEntriesToRemove[i]);
+  }
+
+  // Rebuild TOC entries.
+  var entries = tocEntries(document.getElementById("content"), toclevels);
+  for (var i = 0; i < entries.length; ++i) {
+    var entry = entries[i];
+    if (entry.element.id == "")
+      entry.element.id = "_toc_" + i;
+    var a = document.createElement("a");
+    a.href = "#" + entry.element.id;
+    a.appendChild(document.createTextNode(entry.text));
+    var div = document.createElement("div");
+    div.appendChild(a);
+    div.className = "toclevel" + entry.toclevel;
+    toc.appendChild(div);
+  }
+  if (entries.length == 0)
+    toc.parentNode.removeChild(toc);
+},
+
+
+/////////////////////////////////////////////////////////////////////
+// Footnotes generator
+/////////////////////////////////////////////////////////////////////
+
+/* Based on footnote generation code from:
+ * http://www.brandspankingnew.net/archive/2005/07/format_footnote.html
+ */
+
+footnotes: function () {
+  // Delete existing footnote entries in case we're reloading the footnodes.
+  var i;
+  var noteholder = document.getElementById("footnotes");
+  if (!noteholder) {
+    return;
+  }
+  var entriesToRemove = [];
+  for (i = 0; i < noteholder.childNodes.length; i++) {
+    var entry = noteholder.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div' && entry.getAttribute("class") == "footnote")
+      entriesToRemove.push(entry);
+  }
+  for (i = 0; i < entriesToRemove.length; i++) {
+    noteholder.removeChild(entriesToRemove[i]);
+  }
+
+  // Rebuild footnote entries.
+  var cont = document.getElementById("content");
+  var spans = cont.getElementsByTagName("span");
+  var refs = {};
+  var n = 0;
+  for (i=0; i<spans.length; i++) {
+    if (spans[i].className == "footnote") {
+      n++;
+      var note = spans[i].getAttribute("data-note");
+      if (!note) {
+        // Use [\s\S] in place of . so multi-line matches work.
+        // Because JavaScript has no s (dotall) regex flag.
+        note = spans[i].innerHTML.match(/\s*\[([\s\S]*)]\s*/)[1];
+        spans[i].innerHTML =
+          "[<a id='_footnoteref_" + n + "' href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+        spans[i].setAttribute("data-note", note);
+      }
+      noteholder.innerHTML +=
+        "<div class='footnote' id='_footnote_" + n + "'>" +
+        "<a href='#_footnoteref_" + n + "' title='Return to text'>" +
+        n + "</a>. " + note + "</div>";
+      var id =spans[i].getAttribute("id");
+      if (id != null) refs["#"+id] = n;
+    }
+  }
+  if (n == 0)
+    noteholder.parentNode.removeChild(noteholder);
+  else {
+    // Process footnoterefs.
+    for (i=0; i<spans.length; i++) {
+      if (spans[i].className == "footnoteref") {
+        var href = spans[i].getElementsByTagName("a")[0].getAttribute("href");
+        href = href.match(/#.*/)[0];  // Because IE return full URL.
+        n = refs[href];
+        spans[i].innerHTML =
+          "[<a href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+      }
+    }
+  }
+},
+
+install: function(toclevels) {
+  var timerId;
+
+  function reinstall() {
+    asciidoc.footnotes();
+    if (toclevels) {
+      asciidoc.toc(toclevels);
+    }
+  }
+
+  function reinstallAndRemoveTimer() {
+    clearInterval(timerId);
+    reinstall();
+  }
+
+  timerId = setInterval(reinstall, 500);
+  if (document.addEventListener)
+    document.addEventListener("DOMContentLoaded", reinstallAndRemoveTimer, false);
+  else
+    window.onload = reinstallAndRemoveTimer;
+}
+
+}
+asciidoc.install(3);
+/*]]>*/
+</script>
+</head>
+<body class="article">
+<div id="header">
+<h1>Harry&#8217;s HOWTOs</h1>
+<span id="author">Harry Mangalam</span><br>
+<span id="email" class="monospaced">&lt;<a href="mailto:harry.mangalam@uci.edu">harry.mangalam@uci.edu</a>&gt;</span><br>
+<span id="revnumber">version 1.27,</span>
+<span id="revdate">Jan 30, 2019</span>
+<div id="toc">
+  <div id="toctitle">Table of Contents</div>
+  <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="hpccluster">1. HPC hints &amp; tweaks</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_callee_script_breakage">1.1. callee script breakage</h3>
+<div class="paragraph"><p>There&#8217;s a script that runs on new HPC logins to have users self-identify for Garr&#8217;s accounting program, called:</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>/data/hpc/bin/hpc-user-self-identifying-callee</pre>
+</div></div>
+<div class="paragraph"><p>(authored in the mists of time by Adam Brenner, modified by Edward).</p></div>
+<div class="paragraph"><p>which further calls a python routine that calls UCI&#8217;s LDAP server to identify the user&#8217;s PI:</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>/data/hpc/accounting/user-identification/hpc-user-self-identifying.py</pre>
+</div></div>
+<div class="paragraph"><p>Since the LDAP change-over, the LDAP call has been failing each time its run, confusing users and generating support tix.</p></div>
+<div class="paragraph"><p>It&#8217;s now fixed (until the next LDAP changeover).  Also, this script is triggered if there&#8217;s not a user-named lockfile in</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>/data/hpc/accounting/user-identification/locks/</pre>
+</div></div>
+<div class="paragraph"><p>Somehow these locks have mostly become owed by <em>root:staff</em> instead of by the user, which causes errors should they try to re-run the script.  I haven&#8217;t changed that since probably very few ppl will try that.  just an FYI.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_gnuplot_file_sizes">1.2. gnuplot file sizes</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>module purge; module load perl/5.26.1; module load gnuplot
+cd &lt;root of filesystem&gt;
+# fllowing also tees the 'ls -lR' into a file of same name
+# to save the data should anything explode.
+ls -lR | scut -f=4 | tee ls-lR | sort -gr | feedgnuplot \
+ --extracmds 'set logscale y'</pre>
+</div></div>
+</div>
+<div class="sect2">
+<h3 id="_restart_kde_window_manager">1.3. Restart KDE Window Manager</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>kwin --restart &amp; # simple!</pre>
+</div></div>
+<div class="paragraph"><p>and the plasmashell (kpanel):</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>kquitapp plasmashell &amp;&amp; kstart plasmashell
+# or
+kbuildsycoca5 &amp;&amp; kquitapp plasmashell &amp;&amp; kstart plasmashell</pre>
+</div></div>
+</div>
+<div class="sect2">
+<h3 id="_setting_core_dumps">1.4. Setting Core Dumps</h3>
+<div class="paragraph"><p>Because we don&#8217;t want everyone to be dumping corefiles all over the place, we allow
+coredumps on a one-off basis.  Change the user in the file <em>/data/shell-syswide-setup/system-wide-bashrc</em>.
+The section below shows user <em>anassar</em></p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>if [ "$USER" != "anassar" ]; then
+        ulimit -c 0
+fi</pre>
+</div></div>
+</div>
+<div class="sect2">
+<h3 id="_environment_modules">1.5. environment modules</h3>
+<div class="paragraph"><p>See <a href="http://modules.sourceforge.net/man/modulefile.html">this page</a> for all the module-related stuff.</p></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_system_administration">2. System Administration</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_loadavg_exceptions">2.1. loadavg exceptions</h3>
+<div class="paragraph"><p>Sometimes loadavg goes berserk for various reasons.  The most frequent offender leading to this state is not things using the CPU
+since that&#8217;s obvious, but processes stuck in limbo, usually due to network disk mount problems.  For example, we often have
+NFS disks that go walkabout and when users try to do an <em>ls</em> or <em>du</em> on those mounts, the process just hangs, driving up the loadavg, 1 unit per hung command.  What commands are doing this is often difficult to discern, but the <em>ps</em> command has an option that will help.</p></div>
+<div class="paragraph"><p>From our CentOS 6.9 system</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>PROCESS STATE CODES
+       Here are the different values that the s, stat and state output specifiers (header "STAT" or "S")
+       will display to describe the state of a process.
+    State   Explanation
+       D    Uninterruptible sleep (usually IO)
+       R    Running or runnable (on run queue)
+       S    Interruptible sleep (waiting for an event to complete)
+       T    Stopped, either by a job control signal or because it is being traced.
+       W    paging (not valid since the 2.6.xx kernel)
+       X    dead (should never be seen)
+       Z    Defunct ("zombie") process, terminated but not reaped by its parent.</pre>
+</div></div>
+<div class="paragraph"><p>On another system, with slightly different explanations</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>State   Explanation
+   D    Marks a process in disk (or other short term, uninterruptible) wait.
+   I    Marks a process that is idle (sleeping for longer than about 20 seconds).
+   L    Marks a process that is waiting to acquire a lock.
+   R    Marks a runnable process.
+   S    Marks a process that is sleeping for less than about 20 seconds.
+   T    Marks a stopped process.
+   W    Marks an idle interrupt thread.
+   Z    Marks a dead process (a "zombie").</pre>
+</div></div>
+<div class="paragraph"><p>The <strong>D</strong> status flag in a <em>ps</em> output indicates that the process is <em>disk wait</em> state - waiting for the disk to respond.  If it&#8217;s a hung NFS disk mount, NFS has the "feature" that it will not return a <em>fugedaboutit, I&#8217;m dead</em>, but a <em>just stepped out, will be back soon, please wait</em> signal so the requesting process will do just that.  In some cases (NFS server rebooting),this is a good thing. In others (NFS server power supplies dead), not so much.</p></div>
+<div class="paragraph"><p>The extra apparent <em>loadavg</em> doesn&#8217;t affect the actual performance of the requesting server, but it screws up a lot of stats if you&#8217;re trying to use <em>loadavg</em> as an actual server load metric which many monitoring systems do (ganglia, for one).</p></div>
+<div class="paragraph"><p>So to track down the offending processes, search for those processes which are waiting on disk.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>ps -e  u  | grep ' D '  # find all processes waiting on Disk
+ps -e  u  | grep ' Ds ' # ditto</pre>
+</div></div>
+<div class="paragraph"><p>and kill them off.  In many cases the 1st will find <em>ls</em> and <em>du</em>.  The 2nd will often find instances of <em>bash</em> which have hung wating for disk reads to complete.</p></div>
+<div class="paragraph"><p>On our cluster, on a login node with 16 cores, which had a loadavg of 24, killing off those processes that were waiting on disk (using the <em>D</em> identifier) dropped the loadavg from 24 to 14.  When I killed off those procs with <em>Ds</em>, loadavg continued to drop to the normal range ~ 1.5.</p></div>
+<div class="paragraph"><p>See <a href="https://goo.gl/uF8Hnf">here</a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_how_to_figure_out_hardware">2.2. How to figure out Hardware</h3>
+<div class="paragraph"><p>It&#8217;s often useful to figure out what&#8217;s in a system remotely or without breaking open the case, or to catalog/query various bits of internal hardware.  Herewith, 3 methods for doing so.</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+lspci - brief overview, doesn&#8217;t need root, can dump some interesting info such as with <em>-k</em> the kernel driver for that hardware, <em>-vvv</em> for everything known about the device
+</p>
+</li>
+<li>
+<p>
+lshw - more detailed, doesn&#8217;t really correspond to physical layout.  Also supports classes, but in a different way.  Use <em>lshw -short | less</em> to get a short view with Class of device.
+</p>
+</li>
+<li>
+<p>
+dmidecode - super detailed, should use DMI types to list the sections, otherwise it&#8217;s VERY long. (ie <em>-t 9</em> are the PCI slots); corresponds better  to the physical layout of the system.
+</p>
+</li>
+</ul></div>
+</div>
+<div class="sect2">
+<h3 id="_sensors">2.3. Sensors</h3>
+<div class="paragraph"><p>Scan all the sensors on a (modern) machine. Down to the NVME SSDs.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>$ ipmitool sensor
+
+CPU1 Temp        | 59.000     | degrees C  | ok    | 5.000     | 5.000
+CPU2 Temp        | 58.000     | degrees C  | ok    | 5.000     | 5.000
+System Temp      | 27.000     | degrees C  | ok    | 5.000     | 5.000
+Peripheral Temp  | 37.000     | degrees C  | ok    | 5.000     | 5.000
+MB_NIC_Temp1     | na         |            | na    | na        | na
+MB_NIC_Temp2     | na         |            | na    | na        | na
+VRMCpu1 Temp     | 37.000     | degrees C  | ok    | 5.000     | 5.000
+VRMCpu2 Temp     | 38.000     | degrees C  | ok    | 5.000     | 5.000
+VRMSoc1 Temp     | 52.000     | degrees C  | ok    | 5.000     | 5.000
+VRMSoc2 Temp     | 52.000     | degrees C  | ok    | 5.000     | 5.000
+VRMP1ABCD Temp   | 42.000     | degrees C  | ok    | 5.000     | 5.000
+VRMP1EFGH Temp   | 32.000     | degrees C  | ok    | 5.000     | 5.000
+VRMP2ABCD Temp   | 33.000     | degrees C  | ok    | 5.000     | 5.000
+VRMP2EFGH Temp   | 43.000     | degrees C  | ok    | 5.000     | 5.000
+P1-DIMMA1 Temp   | na         |            | na    | na        | na
+P1-DIMMA2 Temp   | 39.000     | degrees C  | ok    | 5.000     | 5.000
+P1-DIMMB1 Temp   | na         |            | na    | na        | na
+...</pre>
+</div></div>
+</div>
+<div class="sect2">
+<h3 id="_os_maint">2.4. OS Maint</h3>
+<div class="sect3">
+<h4 id="_change_dir_to_own_files">2.4.1. Change Dir to own files</h4>
+<div class="paragraph"><p>This changes the ownership to sticky so that any files writ here will be owned by the dir owner.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>chmod g+s dir</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_boot_single_ignoring_fstab">2.4.2. Boot single, ignoring fstab</h4>
+<div class="paragraph"><p>From <a href="http://www.fclose.com/b/linux/2500/bypassing-bad-fstab-failure-while-booting-linux/">here</a>.</p></div>
+<div class="paragraph"><p>Interrupt the boot (usually <em>e</em>) to edit the kernel boot line and add the following to the kernel line</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>kernel .... single rw init=/bin/bash</pre>
+</div></div>
+<div class="paragraph"><p>that should boot to single user mode, IGNORING the <em>/etc/fstab</em> enabling you to change it to correct a bad fstab entry
+(but haven&#8217;t tried it yet..)</p></div>
+</div>
+<div class="sect3">
+<h4 id="_get_macosx_os_ver">2.4.3. Get MacOSX OS ver #</h4>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>$ uname -a
+Darwin flop.nac.uci.edu 9.7.0 Darwin Kernel Version 9.7.0: Tue Mar 31
+22:54:29 PDT 2009; root:xnu-1228.12.14~1/RELEASE_PPC Power Macintosh
+
+# or
+
+$ sw_vers
+ProductName:    Mac OS X
+ProductVersion: 10.5.7
+BuildVersion:   9J61</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_install_macosx_pkgs_via_cmdline">2.4.4. Install MacOSX pkgs via cmdline</h4>
+<div class="paragraph"><p>if the disk image <strong>OSXvnc1.71.dmg</strong> is downloaded at /Users/hjm</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>12:24:22 hjm@cg1 ~
+72 $ hdiutil attach OSXvnc1.71.dmg
+Checksumming Driver Descriptor Map (DDM : 0)...
+     Driver Descriptor Map (DDM : 0): verified   CRC32 $876DBC1A
+Checksumming Apple (Apple_partition_map : 1)...
+     Apple (Apple_partition_map : 1): verified   CRC32 $3FC18960
+Checksumming disk image (Apple_HFS : 2)...
+          disk image (Apple_HFS : 2): verified   CRC32 $3A4E8BDD
+Checksumming  (Apple_Free : 3).......
+                    (Apple_Free : 3): verified   CRC32 $00000000
+verified   CRC32 $3A457474
+/dev/disk1              Apple_partition_scheme
+/dev/disk1s1            Apple_partition_map
+/dev/disk1s2            Apple_HFS                       /Volumes/OSXvnc
+
+
+12:24:38 hjm@cg1 ~
+73 $ df
+Filesystem           1K-blocks      Used Available Use% Mounted on
+/dev/disk0s3         159955416 153355312   6344104  97% /
+devfs                        1         1         0 100% /dev
+fdesc                        1         1         0 100% /dev
+&lt;volfs&gt;                    512       512         0 100% /.vol
+/dev/disk1s2             10408      9528       880  92% /Volumes/OSXvnc</pre>
+</div></div>
+<div class="paragraph"><p>if it&#8217;s the standard MacOSX app, it is actually a folder which has all the bits
+inside it and it can be installed simply by copying it to the /Applications folder.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_reconfigure_exim">2.4.5. Reconfigure exim</h4>
+<div class="paragraph"><p>Don&#8217;t bother trying to hand-edit all the options in the config file.  MUCH
+easier to just run the reconfig routine and type in the correct settings.
+After trying to reset the hostname for many minutes but not being able to
+find it, I just re-ran this and all was well.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>dpkg-reconfigure exim4-config  # (as root)</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_make_an_em_initrd_em_image_to_match_your_new_kernel">2.4.6. Make an <em>initrd</em> image to match your new kernel</h4>
+<div class="paragraph"><p>yaird is easiest:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>yaird --verbose --output=/boot/initrd.img-2.6.22.1 2.6.22.1</pre>
+</div></div>
+<div class="paragraph"><p>(but got a fatal error the last time).
+However the update-initramfs tool from the initramfs-tools package.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>update-initramfs -k 2.6.22.1 -c -v</pre>
+</div></div>
+<div class="paragraph"><p>(spits out a lot of info about the build, but seems to work just fine).</p></div>
+</div>
+<div class="sect3">
+<h4 id="_updating_sl6_2_repos">2.4.7. Updating SL6.2 repos</h4>
+<div class="paragraph"><p><a href="http://www.dedoimedo.com/computers/scientific-linux-repos.html">see here</a>.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_replicate_a_debian_system">2.4.8. Replicate a Debian system</h4>
+<div class="paragraph"><p>It&#8217;s often convenient to be able to re-load all the packages from one syst to another (replicating an exisiting system, post-major upgrade on a system)</p></div>
+<div class="paragraph"><p><a href="http://baudizm.blogsome.com/2008/12/01/quick-tip-use-dpkg-to-replicate-between-ubuntu-installs">See this article</a> or briefly:</p></div>
+<div class="paragraph"><p>on the old machine:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre> dpkg --get-selections &gt; pkginstalled</pre>
+</div></div>
+<div class="paragraph"><p>on the new machine:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>$ dpkg --set-selections &lt; pkginstalled
+$ apt-get dselect-upgrade</pre>
+</div></div>
+<div class="paragraph"><p>If you get a bunch of warnings like: <em>package blabla not in database</em></p></div>
+<div class="paragraph"><p>You&#8217;ll need to install and use the <em>dselect</em> package to set things right:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>$ sudo apt-get install dselect
+$ sudo dselect
+   -&gt; Update
+   -&gt; Install</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_list_info_about_installed_rpms">2.4.9. List info about installed RPMs</h4>
+<div class="paragraph"><p><a href="http://www.cyberciti.biz/faq/howto-list-installed-rpm-package/">Nice summary</a></p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>'rpm -qa'    # lists all the rpms installed, for example.</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_list_files_in_a_rpm">2.4.10. List files in a .rpm</h4>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>rpm -qlp yaddayadda.rpm  # list the files in a specific rpm
+rpm -ql package-name     # list the files an already installed rpm</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_unpack_a_rpms">2.4.11. Unpack a RPMs</h4>
+<div class="listingblock">
+<div class="content monospaced">
+<pre># this will unpack the rpm into a tree rooted at the cwd.
+rpm2cpio thetarget.rpm | cpio -idmv</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_rebuild_the_rpm_database">2.4.12. Rebuild the RPM database</h4>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>yum clean all
+rpm --rebuild</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_repair_a_broken_yum_database">2.4.13. Repair a broken YUM database</h4>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>yum clean metadata
+yum clean dbcache
+yum update
+
+# or even
+yum clean all</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_dpkg_cheatsheet">2.4.14. dpkg Cheatsheet</h4>
+<div class="paragraph"><p><a href="http://www.cyberciti.biz/howto/question/linux/dpkg-cheat-sheet.php">Nice Summary</a></p></div>
+<div class="paragraph"><p>generate a list of all the installed packages in a way that they can
+be reinstalled or verified post install.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>dpkg --get-selections |grep -v deinstall | cut -f1</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_force_a_package_to_be_installed_even_if_it_conflicts_with_an_existing_package">2.4.15. Force a package to be installed, even if it conflicts with an existing package.</h4>
+<div class="paragraph"><p>Sometimes even apt-get f*cks up.  To unf*ck it, sometimes you have to force things a bit.  Once the <em>apt-get -f install</em>
+command has failed in all its forms and you have no more fingernails to gnaw off, this may be useful</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>dpkg -i --force-overwrite /var/cache/apt/archives/whatever-deb-is-causing-the-problem......deb</pre>
+</div></div>
+<div class="paragraph"><p>This admittedly crude approach is invaluable once the above almost-always-works <em>apt-get -f install</em> fails.
+BUT, not to be taken lightly.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_create_a_usb_from_an_iso_with_7z">2.4.16. Create a USB from an ISO with 7z</h4>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>7z x name-of-iso.iso -o/path/to/mounted/USB/drive</pre>
+</div></div>
+<div class="paragraph"><p>see <a href="http://goo.gl/F3bk0m">this Ubuntu page for more detail.</a></p></div>
+</div>
+<div class="sect3">
+<h4 id="_correct_the_em_not_a_comr_binary_em_error_booting_from_a_usb">2.4.17. Correct the <em>not a comR binary</em> error booting from a USB</h4>
+<div class="paragraph"><p>Mount the USB again on the PC. Then execute the following lines as root:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>cp -r /usr/lib/syslinux/vesamenu.c32 &lt;/USB/mountpoint&gt;/syslinux/
+syslinux /dev/sdb1    # or whatever the device partition is.</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_ecc_memory_errors">2.4.18. ECC Memory errors</h4>
+<div class="paragraph"><p>(from the <a href="http://moo/~hjm/clusterfork/">clusterfork</a> docs)</p></div>
+<div class="paragraph"><p>this requires that the <a href="http://en.wikipedia.org/wiki/Error_detection_and_correction">EDAC system</a> is activated, the kernel module is inserted correctly and that the logging is working correctly.  On CentOS (&gt;5.5) and the
+later Ubuntu releases (&gt;= 10.04), it appears to be.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>cd /sys/devices/system/edac/mc &amp;&amp;  grep [0-9]* mc*/csrow*/[cu]e_count</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_strace">2.4.19. strace</h4>
+<div class="paragraph"><p>Very useful utility to find out what an application is doing.
+ie <strong>strace -p [PID of process]</strong>
+See <a href="https://blogs.oracle.com/ksplice/entry/strace_the_sysadmin_s_microscope">this
+page for some good examples</a>.</p></div>
+<div class="paragraph"><p>To strace the children threads of a parent, try this:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>ps -efL|grep &lt;Process Name&gt; |less
+
+
+# Trace child processes as they are created by currently traced processes as
+# a result of the fork(2) system call.
+strace -f -p</pre>
+</div></div>
+<div class="paragraph"><p>and then find the child PIDs from that if you need them.
+<a href="http://meenakshi02.wordpress.com/2011/02/02/strace-hanging-at-futex/">From here</a></p></div>
+</div>
+<div class="sect3">
+<h4 id="_updating_etc_init_d_scripts">2.4.20. Updating /etc/init.d scripts</h4>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>sudo update-rc.d &lt;basename&gt; defaults
+# ie
+sudo update-rc.d sgeexecd defaults</pre>
+</div></div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_filesystems_raids_and_disks">2.5. Filesystems, RAIDs, and Disks</h3>
+<div class="sect3">
+<h4 id="_maintaining_timestamps_amp_ownership_of_tarchives">2.5.1. Maintaining timestamps &amp; ownership of tarchives</h4>
+<div class="paragraph"><p>When tarchiving old dirs, it&#8217;s useful to maintain the ownership and timestamp for storage management.</p></div>
+<div class="paragraph"><p>To do this with a dir called <em>freesurfer</em></p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>$ ls -ltd freesurfer  # note the date and ownership
+drwxr-xr-x 32 small braincircuits          59 Apr  7  2016 freesurfer
+
+# get the current timestamp and owner of the dir
+TS=`stat --printf=%y freesurfer`
+OWNER=`ls -l freesurfer  | scut -f='2 3' --od='.'`
+
+# tarchive the directory as root
+tar -czf freesurfer.tar.gz freesurfer
+
+# Note that the creator (root) owns the tarchive and the timestamp
+# is the time of the creation (now)
+$ ls -l freesurfer.tar.gz
+-rw-r--r-- 1 root.root 92860763662 Mar 25 08:56 freesurfer.tar.gz
+
+# So rechown it:
+$ chown $OWNER freesurfer.tar.gz
+
+# and touch it to the original date:
+$ touch -d"${TS}"  freesurfer.tar.gz
+
+$ ls -lh  freesurfer.tar.gz
+-rw-r--r-- 1 small braincircuits 87G Apr  7  2016 freesurfer.tar.gz</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_ulimit_amp_open_files">2.5.2. ulimit &amp; open files</h4>
+<div class="paragraph"><p><a href="http://stackoverflow.com/questions/12079087/fork-retry-resource-temporarily-unavailable">[See this page</a></p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>$ sysctl fs.file-nr
+fs.file-nr = 5504       0       26301393
+#   where the #s above mean:
+#         &lt;in_use&gt; &lt;unused_but_allocated&gt; &lt;maximum&gt;
+
+# what a users file descriptor limit is
+ $ ulimit -Hn
+8192
+
+#  how many file descriptors are in use by a user
+$ lsof -u &lt;username&gt;   2&gt;/dev/null | wc -l
+2876</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_beegfs_commands">2.5.3. BeeGFS commands</h4>
+<div class="paragraph"><p>(from dfs-3-1)</p></div>
+<div class="paragraph"><p>BeeGFS GUI:
+     Password: admin
+     java -jar /opt/beegfs/beegfs-admon-gui/beegfs-admon-gui.jar</p></div>
+<div class="paragraph"><p>BeeGFS Usefull Commands:
+     beegfs-check-servers
+     beegfs-ctl --listnodes   --nodetype=metadata   --details
+     beegfs-ctl --listnodes   --nodetype=storage    --details
+     beegfs-ctl --listnodes   --nodetype=client     --details
+     beegfs-ctl --listnodes   --nodetype=management --details
+     beegfs-ctl --listtargets --nodetype=storage    --state
+     beegfs-ctl --listtargets --nodetype=meta       --state</p></div>
+<div class="paragraph"><p>Optimization:
+     /data/system-files/dfs3-optimize.sh</p></div>
+<div class="paragraph"><p>ZFS Useful commands:</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>zpool status
+zfs get compressratio
+zpool get all | grep autoreplace</pre>
+</div></div>
+<div class="paragraph"><p>List Drives byUUID and Serial
+    /data/system-files/dfs3-list-drives-by-uuid-serial.sh</p></div>
+</div>
+<div class="sect3">
+<h4 id="_remount_specific_beegfs">2.5.4. remount specific BeeGFS</h4>
+<div class="paragraph"><p>ie for /dfs3</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>    service beegfs-client  stop dfs3
+    service beegfs-helperd stop dfs3
+
+    service beegfs-helperd start dfs3
+    service beegfs-client  start dfs3
+
+    # or simply
+
+    service beegfs-client  restart dfs3
+    service beegfs-helperd restart dfs3</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_zfs_commands">2.5.5. ZFS commands</h4>
+<div class="paragraph"><p>See <a href="https://pthree.org/2012/04/17/install-zfs-on-debian-gnulinux/">this link</a> for a
+very good description of ZFS on Debian Linux.  The commands blow are largely taken from
+that doc.</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<strong>zpool create <em>poolname</em> <em>devices</em></strong> creates a simple RAID0 of the devices named. ie:
+<em>zpool create tank sde sdf sdg sdh</em> (note that you don&#8217;t have to use the full device name).
+And You shouldn&#8217;t use raw device names anyway, but the disk UIDs which are found in
+<em>/dev/disk/by-id</em>
+</p>
+</li>
+<li>
+<p>
+<strong>zpool status <em>[poolname]</em></strong> will dump the status of that pool.  If the <em>poolname</em>
+is omitted, <em>zpool</em> will dump the status of all the pools it knows about.
+</p>
+</li>
+<li>
+<p>
+<strong>zfs get all [poolname]/[folder] | grep compressratio</strong> will dump the compression
+ratios for the pool mentioned (<a href="http://www.sotechdesign.com.au/category/zfs/">see here</a>)
+</p>
+</li>
+<li>
+<p>
+<strong>zfs get all</strong> will dump everything it knows about the ZFS pools, disk, EVERYTHING.
+pipe it into <em>less</em>.
+</p>
+</li>
+<li>
+<p>
+<strong>zfs set mountpoint=/foo_mount data</strong> will make zfs mount your data pool to a
+designated foo_mount point of your choice.
+</p>
+</li>
+<li>
+<p>
+<strong>zpool events</strong> will dump all the <em>events</em> that it has detected.
+</p>
+</li>
+</ul></div>
+</div>
+<div class="sect3">
+<h4 id="_mdadm_stopping_raids">2.5.6. mdadm stopping RAIDS</h4>
+<div class="paragraph"><p>In order for <em>mdadm</em> to stop a RAID, the RAID needs to be unused by other processes.
+Even if it appears to be untouched by local processes (via <em>lsof</em> or <em>fuser</em>),
+if the FS is NFS-exported, it can still be locked by remote processes even tho they
+are not immediately associated with the FS.</p></div>
+<div class="paragraph"><p><em>mdadm</em> will complain that it can&#8217;t stop the RAID:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>[root@compute-3-9 ~]# mdadm --stop /dev/md0
+mdadm: Cannot get exclusive access to /dev/md0:Perhaps a running process, mounted filesystem or active volume group?</pre>
+</div></div>
+<div class="paragraph"><p>and <em>fuser</em> will list
+ie</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>[root@compute-3-9 compute-3-9]# fuser -m /compute-3-9
+/compute-3-9:            1rce     2rc     3rc     4rc     5rc     6rc
+    7rc    8rc     9rc    10rc    11rc    12rc    13rc    14rc    15rc
+   16rc    17rc    18rc    19rc    20rc    21rc    22rc    23rc    24rc
+   25rc    26rc    27rc    28rc    29rc    30rc    31rc    32rc    33rc
+   34rc    35rc    36rc    37rc    38rc    39rc    40rc    41rc    42rc
+   43rc    44rc    45rc    46rc    47rc    48rc    49rc    50rc  ...</pre>
+</div></div>
+<div class="paragraph"><p>So you need to stop the NFS service as well as as killing off all the other processes (or letting them finish) with th emore polite <em>umount -l /dev/md0</em> (umounts the FS but lets the current open files close <em>naturally</em>)</p></div>
+<div class="paragraph"><p>Once you stop the NFS services:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>[root@compute-3-9 ~]# /etc/init.d/nfs stop
+Shutting down NFS daemon:                                  [  OK  ]
+Shutting down NFS mountd:                                  [  OK  ]
+Shutting down NFS quotas:                                  [  OK  ]
+Shutting down NFS services:                                [  OK  ]
+Shutting down RPC idmapd:                                  [  OK  ]
+
+[root@compute-3-9 ~]# mdadm --stop /dev/md0
+mdadm: stopped /dev/md0</pre>
+</div></div>
+<div class="paragraph"><p>mdadm can stop the raid (as long as there are no more processes accessing it.)</p></div>
+</div>
+<div class="sect3">
+<h4 id="_deleting_the_mdadm_raid_info_from_the_disks">2.5.7. deleting the mdadm RAID info from the disks</h4>
+<div class="paragraph"><p>If you want to use the disks from one mdadm raid in another, you&#8217;ll
+have to <em>blank them</em> 1st by removing the superblock info.</p></div>
+<div class="paragraph"><p>ie, if your raid reports itself as:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>$ cat /proc/mdstat
+Personalities : [raid6] [raid5] [raid4]
+md127 : active (auto-read-only) raid5 sdc1[0] sdf1[4] sde1[2] sdd1[1]
+      8790790656 blocks super 1.1 level 5, 512k chunk, algorithm 2 [4/4] [UUUU]
+      bitmap: 0/22 pages [0KB], 65536KB chunk
+
+unused devices: &lt;none&gt;</pre>
+</div></div>
+<div class="paragraph"><p>then you&#8217;ll have to stop it first (described in more detail above):</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>Fri May 22 15:42:38 root@pbs2:~
+247 $ mdadm --stop /dev/md127
+mdadm: stopped /dev/md127</pre>
+</div></div>
+<div class="paragraph"><p>and finally erase the superblock info:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>$ for II in sdc1 sdf1 sde1 sdd1; do  mdadm --zero-superblock /dev/${II}; done
+# all gone.</pre>
+</div></div>
+<div class="paragraph"><p>Now you can remove the disks and re-use them in another system.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_replacing_a_disk_in_an_mdadm_raid">2.5.8. replacing a disk in an mdadm RAID</h4>
+<div class="paragraph"><p><strong>DO NOT JUST PULL THE BAD DISK OUT</strong>  If you do, see below.</p></div>
+<div class="paragraph"><p>The correct way to replace a disk in a mdadm RAID is to:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+<strong>mdadm fail</strong> the disk
+</p>
+</li>
+<li>
+<p>
+<strong>mdadm remove</strong> the disk
+</p>
+</li>
+<li>
+<p>
+<strong>only then</strong> physically remove the disk (if you have a hotswap backplane) or
+</p>
+</li>
+<li>
+<p>
+power down the system and <strong>THEN</strong> remove the disk, then power the system back up
+</p>
+</li>
+<li>
+<p>
+add the disk back into the RAID.
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>In this case, it&#8217;s /dev/sdc, from both /proc/mdstat and dmesg:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>cat /proc/mdstat
+Personalities : [raid6] [raid5] [raid4]
+md0 : active raid5 sdf[5] sdd[2] sdc[1](F) sde[6] sdb[0]
+      11721064448 blocks super 1.0 level 5, 1024k chunk, algorithm 2 [5/4] [U_UUU]
+# note that '[U_UUU]' - that shows that the second disk in the RAID has died.
+# in this case, it's /dev/sdc, from both the postional info in the [U_UUU]
+# and from the dmesg output, which looks like this:
+...
+end_request: I/O error, dev sdc, sector 5439271384
+end_request: I/O error, dev sdc, sector 5439271384
+md/raid:md0: read error not correctable (sector 5439271384 on sdc).
+sd 3:0:0:0: [sdc] Unhandled sense code
+sd 3:0:0:0: [sdc]
+sd 3:0:0:0: [sdc]
+sd 3:0:0:0: [sdc]
+sd 3:0:0:0: [sdc] CDB:
+end_request: I/O error, dev sdc, sector 5439272072
+end_request: I/O error, dev sdc, sector 5439272072
+md/raid:md0: read error not correctable (sector 5439272072 on sdc).</pre>
+</div></div>
+<div class="paragraph"><p>The bad disk can also be identified by close inspection of the LEDs if they&#8217;re
+connected to the activity monitor pins:</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>ls -lR /raid/mount/point</pre>
+</div></div>
+<div class="paragraph"><p>Will cause all the disks into <em>blinking/read</em> activity, <strong>EXCEPT the bad disk</strong>.
+Now that we know which disk, we can replace it.</p></div>
+<div class="paragraph"><p>The 1st step is to fail it.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre># the bad disk is /dev/sdc (the whole disk; not just a partition)
+# and in this case, we have a hotswap backplane
+BADDISK=/dev/sdc  # for ease of reference
+
+# the 1st step is to 'mdadm fail' it.
+mdadm --manage /dev/md0 --fail $BADDISK
+mdadm: set /dev/sdc faulty in /dev/md0
+
+# then 'mdadm remove' it
+mdadm --manage /dev/md0 --remove $BADDISK
+mdadm: hot removed /dev/sdc from /dev/md0
+
+# ONLY THEN, physically pull the disk.  Once it has been replaced with a disk
+# of AT LEAST the same size, and the disk has spun up and been detected by the OS
+# 'mdadm add' the new disk (which we still refer to as $BADDISK)
+# mdadm --manage /dev/md0 --add $BADDISK
+mdadm: added /dev/sdc
+
+# then check with /proc/mdstat again
+cat /proc/mdstat
+Personalities : [raid6] [raid5] [raid4]
+md0 : active raid5 sdc[7] sdf[5] sdd[2] sde[6] sdb[0]
+      11721064448 blocks super 1.0 level 5, 1024k chunk, algorithm 2 [5/4] [U_UUU]
+      [==&gt;..................]  recovery = 11.1% (326363808/2930266112)
+      finish=438.4min speed=98984K/sec</pre>
+</div></div>
+<div class="paragraph"><p>If you drop a disk, <strong>make sure to fail the failed disk BEFORE you physically remove it</strong>.</p></div>
+<div class="paragraph"><p>However if you don&#8217;t do that, you can still recover, in a very nervous way:
+(In the following example, /dev/sdb went bad and I stupidly removed it without
+failing it out of the RAID6 1st. That means that mdadm lost track of <em>sdb</em> and
+I wasn&#8217;t able to add the replacement back in.  When I tried to, I got:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>$ mdadm --manage /dev/md0 --add /dev/sdc
+mdadm: add new device failed for /dev/sdb as 6: Invalid argument</pre>
+</div></div>
+<div class="paragraph"><p>In order to repair the RAID6 now, you have to re-create the RAID and THEN add the
+previously failed disk back in.</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+stop the mdadm raid: <strong>mdadm -S /dev/md0</strong>
+</p>
+</li>
+<li>
+<p>
+re-create the RAID:
+</p>
+</li>
+</ul></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre># note the 'missing' value in the create line which acts as a placeholder
+mdadm --create /dev/md0 --assume-clean --level=6 --verbose --raid-devices=6 \
+/dev/sda missing /dev/sdc  /dev/sdd  /dev/sde  /dev/sdf
+#        ^^^^^^^
+mdadm: layout defaults to left-symmetric
+mdadm: layout defaults to left-symmetric
+mdadm: chunk size defaults to 512K
+mdadm: /dev/sda appears to be part of a raid array:
+       level=raid6 devices=6 ctime=Thu Apr 16 10:33:32 2015
+mdadm: /dev/sdc appears to be part of a raid array:
+       level=raid6 devices=6 ctime=Thu Apr 16 10:33:32 2015
+mdadm: /dev/sdd appears to be part of a raid array:
+       level=raid6 devices=6 ctime=Thu Apr 16 10:33:32 2015
+mdadm: /dev/sde appears to be part of a raid array:
+       level=raid6 devices=6 ctime=Thu Apr 16 10:33:32 2015
+mdadm: /dev/sdf appears to be part of a raid array:
+       level=raid6 devices=6 ctime=Thu Apr 16 10:33:32 2015
+mdadm: size set to 2930135040K
+mdadm: automatically enabling write-intent bitmap on large array
+Continue creating array? y
+mdadm: Defaulting to version 1.2 metadata
+mdadm: array /dev/md0 started.</pre>
+</div></div>
+<div class="ulist"><ul>
+<li>
+<p>
+then ad the <em>new</em> /dev/sdb back:
+</p>
+</li>
+</ul></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>[root@compute-7-1 /]# mdadm --add /dev/md0 /dev/sdb
+mdadm: added /dev/sdb
+
+[root@compute-7-1 /]# cat /proc/mdstat
+Personalities : [raid6] [raid5] [raid4]
+md0 : active raid6 sdb[6] sdf[5] sde[4] sdd[3] sdc[2] sda[0]
+      11720540160 blocks super 1.2 level 6, 512k chunk, algorithm 2 [6/5] [U_UUUU]
+      [&gt;....................]  recovery =  0.0% (562176/2930135040) finish=1129.0min speed=43244K/sec
+      bitmap: 0/22 pages [0KB], 65536KB chunk</pre>
+</div></div>
+<div class="ulist"><ul>
+<li>
+<p>
+now it can be mounted and used as it&#8217;s rebuilding.
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>See:
+<a href="http://www.linuxquestions.org/questions/linux-server-73/mdadm-error-replacing-a-failed-disk-909577/">http://www.linuxquestions.org/questions/linux-server-73/mdadm-error-replacing-a-failed-disk-909577/</a></p></div>
+</div>
+<div class="sect3">
+<h4 id="_wiping_disks">2.5.9. Wiping disks</h4>
+<div class="paragraph"><p>Truly wiping disks to prevent the NSA from recovering yur data is fairly
+pointless since they have
+so many other avenues to that data.  However, it you want to pass on a laptop
+or sell an old disk on ebay without allowing your private info to be easily
+recovered, you can try <em>dd</em> or <em>badblocks</em> as described below:
+<em>dd</em> without a <em>count</em> parameter will just keep going until it hits the end of the disk
+so the time to finish will be proportional to the size of the disk and the speed at which it
+can be forced to write (modern disks write at about 100MB/s so a 3TB disk will
+take ~ 8.3hr to wipe the entire disk this way. Older disk of the older laptop size
+will be smaller (say 80GB) and slower (say 50MB/s), so such a disk will take about an hour.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>dd bs=1M if=/dev/zero of=/dev/sd#
+
+or
+
+dd bs=1M if=/dev/urandom of=/dev/sd#
+
+or
+
+badblocks -wvs /dev/sd#</pre>
+</div></div>
+<div class="paragraph"><p>See <a href="http://superuser.com/questions/86952/disk-wiping-other-than-dban">this superuser thread</a> for a longer discussion and more hints.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_remount_running_filesystems_to_change_options">2.5.10. Remount running filesystems to change options</h4>
+<div class="paragraph"><p>Sometimes it&#8217;s useful to change options when a filesystem is running.  This is possible and safe with modern Liux systems.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>mount -o remount,rw,noatime,nodiratime,swalloc,largeio,barrier,sunit=512,swidth=8192,allocsize=32m,inode64 /raid2</pre>
+</div></div>
+<div class="paragraph"><p>examining /etc/mtab should show you that the option has changed.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_re_setup_fraunhofer_on_hpc_nodes">2.5.11. Re-setup Fraunhofer on HPC nodes</h4>
+<div class="paragraph"><p>Need to reset the env variables <em>HPC_CURRENT_KERNEL_RPM</em>
+<strong>ON THE NODE THAT you&#8217;re trying to fix</strong></p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>export HPC_CURRENT_KERNEL_RPM=/data/node-setup/node-files/rpms/kernel/whatever_it_is
+# like this:
+# export HPC_CURRENT_KERNEL_RPM=/data/node-setup/node-files/rpms/kernel/kernel-2.6.32-358.18.1.el6.x86_64.rpm
+# and then...
+/data/node-setup/add-fhgfs.sh  # this is pretty robust.</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_mounting_remounting_multiple_fhgfs_mounts">2.5.12. Mounting/remounting multiple Fhgfs mounts</h4>
+<div class="paragraph"><p>From Adam Brenner:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>to restart /fast-scratch we would use:
+
+  service fhgfs-helperd restart fast-scratch
+  service fhgfs-client restart fast-scratch
+
+Like wise, for /dfs1 (distributed filesystem 1)
+
+  service fhgfs-helperd restart dfs1
+  service fhgfs-client restart dfs1</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_remove_lsi_em_foreign_em_info">2.5.13. Remove LSI <em>Foreign</em> info</h4>
+<div class="paragraph"><p>When the disk that you&#8217;re trying to use has some info designating it as part of
+another array or somehow non-native, you have to clear the <em>foreign</em> info.  Not
+easy to find, but the storcli does have a command for it.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre># on controller 0, for all foreign disks, clear the foreign info
+./storcli /c0/fall  del</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_dump_all_relevant_smart_info_to_a_file">2.5.14. Dump all relevant SMART info to a file</h4>
+<div class="listingblock">
+<div class="content monospaced">
+<pre># then grep out the useful bits
+egrep '== /dev'\|'^Model'\|'^Device Model'\|'^Serial'\|'^Firm'\|'5 Reall'\|'9 Power'\|'187 Rep'\|'197 Cur'\|'198 Off'\|'199 UDMA'\|'^ATA Error'\|'Extended offline'
+
+# or with simpler plain grep:
+
+grep '== /dev\|^Model\|^Device Model\|^Serial\|^Firm\|5 Reall\|9 Power\|187 Rep\|197 Cur\|198 Off\|199 UDMA\|^ATA Error\|Extended offline'</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_remove_3ware_raid_info_from_a_disk">2.5.15. Remove 3ware RAID info from a disk</h4>
+<div class="paragraph"><p>(this should also work with disks from LSI controllers - testing now)
+This will remove the 3ware RAID info so the disk won&#8217;t show up as being part of a previous RAID.
+This is quite disconcerting when a supposedly newly tested disk comes up as a failed RAID.
+This has been verified at least 10x by me as well.</p></div>
+<div class="paragraph"><p>See <a href="http://www.finnie.org/2010/06/07/howto-delete-a-3ware-dcb/">this entry</a></p></div>
+<div class="paragraph"><p>In order to have direct access to the disk, need to pull it and place into another
+computer, easiest is another compute node, but can also do it on a desktop with
+the appropriate controller (dumb controllers are best; HW controllers will tend to
+interpose their own overhead and presentation to the OS).  If the OS presents the
+test disk directly in the form of <em>/dev/sdX</em>, that&#8217;s good.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>DISK=sdX  # where X is the device of interest.  Prob not 'a'
+COUNT=2048  # indicator of how much overwrite you want to do on begin &amp; end
+
+LBAS=$(cat /sys/block/$DISK/size)
+echo "LBAS = $LBAS"
+dd if=/dev/zero of=/dev/$DISK bs=512 count=$COUNT
+dd if=/dev/zero of=/dev/$DISK bs=512 seek=$(($LBAS-$COUNT)) count=$COUNT</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="smart9750">2.5.16. Pull SMART data: 3ware 9750</h4>
+<div class="paragraph"><p><strong>Note that this only works on SATA disks on the 9750, not SAS disks.</strong></p></div>
+<div class="paragraph"><p>If the 3DM2 interface shows <em>ECC errors</em> on a SATA disk, or other hard to figure
+out error, you can view the SMART info on a per-disk basis from behind the 3ware
+9759 using the <em>smartctl</em> CLI.  This will allow you to check the severity of the
+error.  ie the 3DM2 interface will tell you that there is an <em>ECC error</em> but
+will not tell you whether this has resulted in uncorrectable reallocs (BAD), or
+whether the ECCs trigggered a correction - a valid realloc (not uncommon).  You
+don&#8217;t want to see hundreds of reallocs, especially if they&#8217;re increasing in #,
+but having a low and stable number of reallocs is acceptable (depending on your
+budget and your definition of <em>acceptable</em>).</p></div>
+<div class="paragraph"><p>Otherwise, in order to check the error state of the disk, you have to pull the
+disk to examine it on another machine, causing a degraded array, and a
+several-hour rebuild.</p></div>
+<div class="paragraph"><p>The <em>smartctl</em> man pages does not make this very clear, but the sequences of
+<em>devices</em> that you have to query is not the <em>/dev/twl[#]</em> but the <em>-d
+3ware,start-finish</em>.  ie you use the same <em>/dev/twl0</em> and iterate over the
+<em>3ware,start-finish</em> as shown below.  In my case, the active numbers are 8-43 in
+a 36-slot Supermicro chassis.  Yours may be anything, but I would suggest
+starting at 0 and going as high as you need to catch the beginning sequence. I
+included the <em>(seq 7 44)</em> to see if any of the chassis' started numbering
+outside of that range.  In my case they didn&#8217;t.</p></div>
+<div class="paragraph"><p>The grep filter just grabs the bits I&#8217;m interested in.  You&#8217;ll have to look at
+the <em>smartctl</em> output to decide what you want.  You can see what gets grabbed in
+the example output below.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>$ <span style="font-weight: bold"><span style="color: #0000FF">for</span></span> II <span style="font-weight: bold"><span style="color: #0000FF">in</span></span> <span style="color: #009900">$(</span>seq <span style="color: #993399">7</span> <span style="color: #993399">44</span><span style="color: #990000">);</span> <span style="font-weight: bold"><span style="color: #0000FF">do</span></span> <span style="color: #990000">\</span>
+  echo <span style="color: #FF0000">"== $II =="</span><span style="color: #990000">;</span> <span style="color: #990000">\</span>
+  smartctl -a -d 3ware<span style="color: #990000">,</span><span style="color: #009900">${II}</span> /dev/twl<span style="color: #993399">0</span> <span style="color: #990000">|</span> <span style="color: #990000">\</span>
+  egrep <span style="color: #FF0000">'Device Model'</span><span style="color: #990000">\|</span><span style="color: #FF0000">'Serial Number'</span><span style="color: #990000">\|</span><span style="color: #FF0000">'^  5 '</span><span style="color: #990000">\|</span><span style="color: #FF0000">'^  9 '</span><span style="color: #990000">\|</span><span style="color: #FF0000">'^187'</span><span style="color: #990000">\|</span><span style="color: #FF0000">'^198'</span><span style="color: #990000">\|</span><span style="color: #FF0000">'^199'</span><span style="color: #990000">;</span> <span style="color: #990000">\</span>
+<span style="font-weight: bold"><span style="color: #0000FF">done</span></span></tt></pre></div></div>
+<div class="paragraph"><p>And output is&#8230;</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>.... (much deleted)
+
+== 42 ==
+Device Model:     ST3000DM001-9YN166
+Serial Number:    W1F0BZCA
+  5 Reallocated_Sector_Ct   0x0033   100   100   036    Pre-fail  Always       -       0
+  9 Power_On_Hours          0x0032   084   084   000    Old_age   Always       -       14271
+187 Reported_Uncorrect      0x0032   100   100   000    Old_age   Always       -       0
+198 Offline_Uncorrectable   0x0010   100   100   000    Old_age   Offline      -       0
+199 UDMA_CRC_Error_Count    0x003e   200   200   000    Old_age   Always       -       0
+== 43 ==
+Device Model:     ST3000DM001-9YN166
+Serial Number:    W1F0A83L
+  5 Reallocated_Sector_Ct   0x0033   100   100   036    Pre-fail  Always       -       0
+  9 Power_On_Hours          0x0032   084   084   000    Old_age   Always       -       14271
+187 Reported_Uncorrect      0x0032   100   100   000    Old_age   Always       -       0
+198 Offline_Uncorrectable   0x0010   100   100   000    Old_age   Offline      -       0
+199 UDMA_CRC_Error_Count    0x003e   200   200   000    Old_age   Always       -       0
+== 44 ==
+ ... (no output, showing that the sequence stops at 43)</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="Falcon">2.5.17. Pull SMART data: LSI SAS2008 Falcon</h4>
+<div class="paragraph"><p>This is one of the best controllers for ZFS, which has an <em>lspci</em> string like this:</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>03:00.0 Serial Attached SCSI controller: LSI Logic / Symbios Logic SAS2008 PCI-Express Fusion-MPT SAS-2 [Falcon] (rev 03)</pre>
+</div></div>
+<div class="paragraph"><p>In order to extract the SMART data from this controller, you have to use the /dev/sgX syntax:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre># this takes about 45s to run on a 36 disk chassis
+rm -f diskscan;
+for ii in $(seq 0 39); do
+  echo "== /dev/sg${ii} ==" &gt;&gt; diskscan;
+  smartctl -iHA -l error -l selftest /dev/sg${ii} &gt;&gt; diskscan;
+done</pre>
+</div></div>
+<div class="paragraph"><p>for ii in b c d; do
+  echo &gt;&gt; diskscan;
+  egrep <em>== /dev</em>\|<em><sup>Model</em>\|<em></sup>Device Model</em>\|<em><sup>Serial</em>\|<em></sup>Firm</em>\|<em>5 Reall</em>\|<em>9 Power</em>\|<em>187 Rep</em>\|<em>197 Cur</em>\|<em>198 Off</em>\|<em>199 UDMA</em>\|<em>^ATA Error</em>\|<em>Extended offline</em>   &gt;&gt; diskscan;
+done</p></div>
+</div>
+<div class="sect3">
+<h4 id="smartmegaraid">2.5.18. Pull SMART data: LSI MegaRAID</h4>
+<div class="paragraph"><p>Similarly, the smartmontools can pull a more limited amount of info from SAS
+disks connected to an LSI MegaRAID controller.
+In the following, the controller is an LSI Nytro 81004i with a total of 36
+Hitachi SAS disks in 2 RAIDs of 17 disks each with 1 Global Hot Spare and 1
+spare disk.</p></div>
+<div class="paragraph"><p>The disks themselves can be probed with an iteration (similar to the 3ware
+controllers above) starting from 6 and going to 43 for some reason on  this
+(36bay Supermicro) chassis.  An example output is shown below.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre># for SAS disks
+$ smartctl -a -d megaraid,6  /dev/sdb
+
+# for SATA disks '-d sat+megaraid,6' - 'megaraid' by itself isn't sufficient.
+# where the ',6' is the disk slot number
+# depending on the chassis and how it's wired, this number can start at 6,7,or
+# 8 and go as high as the number of slots + the initial offset.
+# the '/dev/sdb' is the device that the RAID controller presents to the OS.
+
+# can also invoke tests on the SAS disks as well as the SATA disks with:
+# smartctl -t short  -d megaraid,24  /dev/sdb
+# (note that the '/dev/sdb' can also be /dev/sda in the above, if the disks
+# are presented as 2 arrays. It just needs to be able to find the right controller
+# and either of the 2 will point to it.
+
+smartctl 5.43 2012-06-30 r3573 [x86_64-linux-2.6.32-431.5.1.el6.x86_64] (local build)
+Copyright (C) 2002-12 by Bruce Allen, http://smartmontools.sourceforge.net
+
+Vendor:               HITACHI
+Product:              HUS723030ALS640
+Revision:             A350
+User Capacity:        3,000,592,982,016 bytes [3.00 TB]
+Logical block size:   512 bytes
+Logical Unit id:      0x5000cca03e5f8fa4
+Serial number:                YVHPK6LK
+Device type:          disk
+Transport protocol:   SAS
+Local Time is:        Tue Feb 18 12:50:18 2014 PST
+Device supports SMART and is Enabled
+Temperature Warning Enabled
+SMART Health Status: OK
+
+Current Drive Temperature:     32 C
+Drive Trip Temperature:        85 C
+Manufactured in week 48 of year 2012
+Specified cycle count over device lifetime:  50000
+Accumulated start-stop cycles:  17
+Specified load-unload count over device lifetime:  600000
+Accumulated load-unload cycles:  325
+Elements in grown defect list: 0
+Vendor (Seagate) cache information
+  Blocks sent to initiator = 688410477985792
+
+Error counter log:
+           Errors Corrected by           Total   Correction     Gigabytes    Total
+               ECC          rereads/    errors   algorithm      processed    uncorrected
+           fast | delayed   rewrites  corrected  invocations   [10^9 bytes]  errors
+read:          0    55798         0     55798    6350629     140344.648           0
+write:         0    93714         0     93714      16256      10074.763           0
+verify:        0       20         0        20       1258          1.040           0
+
+Non-medium error count:        0
+No self-tests have been logged
+Long (extended) Self Test duration: 27182 seconds [453.0 minutes]</pre>
+</div></div>
+<div class="paragraph"><p>Note that this doesn&#8217;t have nearly the same amount of status info as it can pull from SATA disks.</p></div>
+<div class="paragraph"><p>An example script to pull all the interesting data from an array (ie /dev/sdb) would be:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>RAID="/dev/sdb"
+for II in $(seq 6 43); do
+  echo ""
+  echo ""
+  echo "==== Slot $II ===="
+  smartctl -a -d megaraid,${II}  $RAID | egrep 'Vendor'\|'Product'\|'Serial number'
+done
+
+or as a 'one-liner':
+RAID="/dev/sdb";for II in $(seq 6 43); do  echo ""; echo ""; echo "==== Slot $II ====";\
+smartctl -a -d megaraid,${II}  $RAID; done
+
+# pipe output thru egrep "ID1|ID2" ID3|etc" to filter the ones you want as above.</pre>
+</div></div>
+<div class="paragraph"><p>As an aside, the bash expression {a..z} does the same thing for characters.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>$ echo {a..g}
+a b c d e f g
+
+$ for II in {j..o}; do echo $II; done
+j
+k
+l
+m
+n
+o</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_rsync_trailing_em_s_em">2.5.19. rsync trailing <em>/s</em></h4>
+<div class="paragraph"><p>There&#8217;s a quirk with rsync that is not a bug, but a required finesse.  Most Linux
+utilities don&#8217;t care if you include a trailing "/".  rsync does and it makes a difference both in the source and target.
+f you append the "/" to the source, but NOT the target, it tells rsync to sync the individual CONTENTS of the source to the target.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>rsync -av nco-4.2.6 moo:~/tnco</pre>
+</div></div>
+<div class="paragraph"><p>results in what you usually expect:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>Tue May 17 10:29:14 [0.11 0.12 0.13]  hjm@moo:~/tnco
+509 $ ls
+nco-4.2.6/
+
+Tue May 17 10:30:02 [0.29 0.15 0.15]  hjm@moo:~/tnco
+512 $ ls -w 70 nco-4.2.6/
+COPYING      acinclude.m4  bld/         configure.eg  m4/
+INSTALL      aclocal.m4    bm/          configure.in  man/
+Makefile.am  autobld/      config.h.in  data/         qt/
+Makefile.in  autogen.sh*   configure*   doc/          src/</pre>
+</div></div>
+<div class="paragraph"><p>BUT if you append the trailing "/" to the source, you get the CONTENTS of the source
+synced to the target:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>Tue May 17 10:31:31 [0.17 0.17 0.16]  hjm@moo:~/tnco
+516 $ ls -w 70
+COPYING      acinclude.m4  bld/         configure.eg  m4/
+INSTALL      aclocal.m4    bm/          configure.in  man/
+Makefile.am  autobld/      config.h.in  data/         qt/
+Makefile.in  autogen.sh*   configure*   doc/          src/</pre>
+</div></div>
+<div class="paragraph"><p>If you append a trailing "/" to the target, makes no difference.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>rsync -av nco-4.2.6 moo:~/tnco
+# and
+rsync -av nco-4.2.6 moo:~/tnco/</pre>
+</div></div>
+<div class="paragraph"><p>will both result in the result immediately above.</p></div>
+<div class="paragraph"><p>However,</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>rsync -av nco-4.2.6 moo:~/tnco
+# followed by
+rsync -av nco-4.2.6/ moo:~/tnco</pre>
+</div></div>
+<div class="paragraph"><p>will result in a double syncing, with one set of files in the target dir and the second in
+a subdir named <em>moo:~/tnco/nco-4.2.6</em>.</p></div>
+<div class="paragraph"><p>so be careful.  You generally want the format WITHOUT any "/"s.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_rsync_in_exclude_patterns">2.5.20. rsync in/exclude patterns</h4>
+<div class="paragraph"><p><a href="http://goo.gl/bFsJaG">This is a good overview</a> in understandable English.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_quickly_delete_bazillions_of_files_with_rsync">2.5.21. Quickly delete bazillions of files with rsync</h4>
+<div class="paragraph"><p>the following rsync command will recursively delete files about 10X faster than the usual <em>rm -rf</em>.
+See <a href="http://www.slashroot.in/which-is-the-fastest-method-to-delete-files-in-linux">this link</a> to read about it in more detail.  It works.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>mkdir empty
+rsync -a --delete empty/ targetdir/
+# note that both dirs have a '/' at the end of the dir name. THIS IS REQUIRED
+
+# the above command will leave the top level dir, so follow with
+rm -rf targetdir/</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_and_even_quicker_with_perl">2.5.22. And even quicker with Perl</h4>
+<div class="paragraph"><p>Same link as above.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>perl -e 'for(&lt;*&gt;){((stat)[9]&lt;(unlink))}'</pre>
+</div></div>
+<div class="paragraph"><p>Careful - this microscript is recursive and non-interactive.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_testing_an_mdadm_raid_to_check_that_the_mail_notification_is_working">2.5.23. Testing an mdadm RAID to check that the mail notification is working</h4>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>sudo mdadm --monitor --scan -1 -m 'hmangala@uci.edu' -t
+# should have the email in the /etc/mdadm/mdadm.conf file already tho.</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_primitive_daily_mdadm_email_notification">2.5.24. Primitive daily mdadm email notification</h4>
+<div class="paragraph"><p>This section has been expanded into <a href="http://moo.nac.uci.edu/~hjm/bduc/HOWTO_verify_RAID_by_crontab.html">an entire doc</a>, covering a number of controllers with proprietary software as well as the Linux software RAID system <a href="http://en.wikipedia.org/wiki/Mdadm">mdadm</a>.</p></div>
+<div class="paragraph"><p>crontab -l:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>07  12   *   *   *   cat /proc/mdstat| mutt -s 'PBS1 mdadm check' hmangala@uci.edu</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_more_sophisticated_way_of_using_email_mdadm_checking">2.5.25. More sophisticated way of using email/mdadm checking</h4>
+<div class="listingblock">
+<div class="content monospaced">
+<pre># this is the query command which gives a nice overview of the RAID
+/sbin/mdadm -Q --detail /dev/mdX
+
+# this is the entry for a crontab which would send an email that has an easy
+# to read subject line with details in the email body:
+# (all in one line for a contab entry)
+4   6,20  *   *   *   SUB=`/sbin/mdadm -Q --detail /dev/md0 |grep 'State:'`; \
+ /sbin/mdadm -Q --detail /dev/md0 | mutt -s "DUST RAID: $SUB"  hmangala@uci.edu
+
+
+# if the node has multiple mdadm RAIDs, you can do all at once with:
+05  6,20   *   *   *   SUB=/sbin/mdadm -Q --detail /dev/md0 /dev/md1 \
+ /dev/md2 |grep 'State :' | cut -f2 -d':' | tr '\n' ' ' ; /sbin/mdadm -Q \
+ --detail /dev/md0 /dev/md1 /dev/md2 | mutt -s "BDUC-LOGIN MDADM RAIDs: \
+ $SUB" hmangala@uci.edu</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_assembling_a_pre_existing_raid_on_a_new_os">2.5.26. Assembling a pre-existing RAID on a new OS.</h4>
+<div class="paragraph"><p>The problem is that you had a RAID running perfectly on another OS and the system disk dies or had to be replaced for other reasons, or you needed to upgrade it with a bare-metal replacement.  How do you resucitate a pre-existing RAID?  It&#8217;s very difficult:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>$ mdadm -A [the-old-array-name]
+  ie:
+$ mdadm -A /dev/md0
+ mdadm: /dev/md0 has been started with 4 drives.
+
+# mdadm queries the system, finds the disks, examines the embedded config info and restarts the RAID as before.
+
+$ cat /proc/mdstat
+Personalities : [raid6] [raid5] [raid4]
+md0 : active raid5 sdb1[0] sde1[4] sdd1[2] sdc1[1]
+      8790400512 blocks super 1.2 level 5, 512k chunk, algorithm 2 [4/4] [UUUU]</pre>
+</div></div>
+<div class="paragraph"><p>mdadm is <strong>VERY</strong> smart.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_prepping_an_old_mdadm_array_for_a_new_array">2.5.27. Prepping an old mdadm array for a new array</h4>
+<div class="paragraph"><p>you have to stop the old array before you can re-use the disks.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>mdadm --stop /dev/md_d0 (or whatever the old array is called)</pre>
+</div></div>
+<div class="paragraph"><p>and then you can re-use the disks, altho you may have to force mdadm to
+continue to include them into the new array, like this (from <em>man mdadm</em>):</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>mdadm --create /dev/md0 --level=1 --raid-devices=2 /dev/hd[ac]1
+# Create /dev/md0 as a RAID1 array consisting of /dev/hda1 and /dev/hdc1.
+
+echo 'DEVICE /dev/hd*[0-9] /dev/sd*[0-9]' &gt; mdadm.conf
+mdadm --detail --scan &gt;&gt; mdadm.conf</pre>
+</div></div>
+<div class="paragraph"><p>The above will create a prototype config file that describes currently
+active arrays that are known to be made  from  partitions of IDE or
+SCSI drives.  This file should be reviewed before
+being used as it may contain unwanted detail.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_replace_a_disk_from_an_mdadm_raidx">2.5.28. Replace a disk from an mdadm RAIDX</h4>
+<div class="paragraph"><p><a href="http://www.clan-elite.info/forum.asp?action=view_thread&amp;id=904">Here&#8217;s how</a>.</p></div>
+<div class="paragraph"><p>briefly:
+remove the bad partition (in the below example, sdc1), from the RAID:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>mdadm --manage /dev/md0 -r /dev/sdc1</pre>
+</div></div>
+<div class="paragraph"><p>Then power-off the machine if it doesn&#8217;t have hot-swap slots and  replace
+the disk (careful about which one it is); always a good idea to test what
+you think is the failed disk with a USB IDE/SATA cable set.</p></div>
+<div class="paragraph"><p>Then power on the machine (mdadm should flash a console message that the
+raid is operating in a degraded state) and once it&#8217;s up, format the new disk
+like the old disk
+The URL above says you can do it with:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>sfdisk -d /dev/sda | sfdisk /dev/sdc</pre>
+</div></div>
+<div class="paragraph"><p>where <em>/dev/sda</em> is one of the pre-existing disks and <em>/dev/sdc</em> is the new
+disk.  see <em>man sfdisk</em></p></div>
+<div class="paragraph"><p>If you&#8217;re going to use fdisk or cfdisk, use disk type <em>FD</em> for
+<em>Linux RAID AUTODETECT</em>), and re-add the disk to the RAID with:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>mdadm --manage /dev/md0 -a /dev/sdc1</pre>
+</div></div>
+<div class="paragraph"><p>Look at <em>/proc/mdstat</em> to check the rebuild status.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_find_the_disk_uuids_for_specifying_disks_in_etc_fstab">2.5.29. Find the Disk UUIDs for specifying disks in /etc/fstab</h4>
+<div class="paragraph"><p><strong>Use blkid</strong>.  See below.</p></div>
+<div class="paragraph"><p>While a pain and not intuitive (like /dev/sdc3 is intuitive?), using the disk
+UUIDs will prevent disk order swapping and possible data loss when
+reformatting the disk you thought was <em>/dev/sdb</em> and on reboot, turned into
+<em>/dev/sda</em>.</p></div>
+<div class="paragraph"><p>ie:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>$ sudo ssh a64-182
+Last login: Tue Oct  9 09:55:45 2012 from bduc-login.bduc
+[root@a64-182 ~]# blkid
+/dev/sda: UUID="d274d4cf-9b09-4ed2-a66d-7c568be7ea45" TYPE="xfs"
+/dev/sdb1: LABEL="/boot" UUID="510f25d0-abee-4cb1-8f1e-e7bccc37d79b" /SEC_TYPE="ext2" TYPE="ext3"
+/dev/sdb2: LABEL="SWAP-sda2" TYPE="swap"
+/dev/sdb3: LABEL="/" UUID="d0d4bc25-3e48-4ee6-8119-9ce54079ee83" /SEC_TYPE="ext2" TYPE="ext3"</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_label_your_disks_correctly_in_ubuntu_kubuntu">2.5.30. Label your disks correctly in Ubuntu/Kubuntu</h4>
+<div class="paragraph"><p>from <a href="http://ubuntuforums.org/showthread.php?t=283131">original source</a></p></div>
+<div class="paragraph"><p>To list your devices, first put connect your USB device (it does not need to be mounted).</p></div>
+<div class="paragraph"><p>By volume label:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>ls /dev/disk/by-label -lah</pre>
+</div></div>
+<div class="paragraph"><p>By id:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>ls /dev/disk/by-id -lah</pre>
+</div></div>
+<div class="paragraph"><p>By uuid:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>ls /dev/disk/by-uuid -lah</pre>
+</div></div>
+<div class="paragraph"><p>IMO, LABEL is easiest to use as you can set a label and it is human readable.
+The format to use instead of the device name in the fstab file is:</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>LABEL=&lt;label&gt; (Where &lt;label&gt; is the volume label name, ex. "data").</pre>
+</div></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>UUID=&lt;uuid&gt; (Where &lt;uuid&gt; is some alphanumeric (hex) like fab05680-eb08-4420-959a-ff915cdfcb44).</pre>
+</div></div>
+<div class="paragraph"><p>Again, IMO, using a label has a strong advantage with removable media (flash drives).</p></div>
+</div>
+<div class="sect3">
+<h4 id="_mount_uci_webfiles_as_a_filesystem">2.5.31. Mount UCI Webfiles as a filesystem</h4>
+<div class="listingblock">
+<div class="content monospaced">
+<pre># hjm still works.
+$ sudo mount -t davfs https://webfiles.uci.edu/hmangala  /home/hjm/webdav</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_3ware_tw_cli_manual_8230">2.5.32. 3ware tw_cli manual&#8230;</h4>
+<div class="olist lowerroman"><ol class="lowerroman">
+<li>
+<p>
+is <a href="http://moo.nac.uci.edu/~hjm/3ware_tw_cli_Guide-3-07.pdf">right here in PDF</a>
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect3">
+<h4 id="_mount_the_nacs_file_tree_via_webdav">2.5.33. Mount the NACS file tree via WebDAV</h4>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>$ sudo  mount -t davfs https://www.nacs.uci.edu/dav dav</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_default_passwords_for_raid_controllers">2.5.34. Default Passwords for RAID Controllers</h4>
+<div class="paragraph"><p>Areca: BIOS and web interface are set on the controller and are therefore the same for either access mechanism.
+The default login is  <em>admin</em> and <em>0000</em>.</p></div>
+<div class="paragraph"><p>Interestingly, there is a MASTER password that will allow you to unlock the controller (only at the BIOS level).  Works with the ARC-1110, ARC-1160, ARC-1120, ARC-1160, ARC-1220, and probably many more.  May need to enter #s from the keyboard, not the numeric keypad.</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>mno974315743924
+aaa############ a = alphabet; # = numbers</pre>
+</div></div>
+<div class="paragraph"><p>3ware: For the 3DM2 web interface, for both <em>User</em> and <em>Admin</em>, it&#8217;s <em>3ware</em>.  Don&#8217;t know about the BIOS level passwords, if any.  If lost, the password can be reset by stopping the 3dm2 daemons, then copying in a known encrypted password from another system into the right place in the /etc/3dm2/3dm2.conf file and then re-starting the 3dm2 daemons again.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_fixing_the_em_u_em_status_when_inserting_drives_in_3ware_9750_controlled_arrays">2.5.35. Fixing the <em>u?</em> status when inserting drives in 3ware 9750-controlled arrays</h4>
+<div class="paragraph"><p>(Wed Jan 30 PST 2013)
+(Possibly impacts other 3ware arrays as well.) Had this problem recently when some disks previously used in arrays as well as some disks NOT used in arrays were inserted and reported their type as <em>u?</em> when listed by the <em>tw_cli</em> utility.</p></div>
+<div class="paragraph"><p>It should have looks like this when it was sensed by the controller:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>p43   OK             -    2.73 TB   SATA  -   /c6/e1/slt2  ST3000DM001-9YN166</pre>
+</div></div>
+<div class="paragraph"><p>but instead looked like this:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>p43   OK             u?    2.73 TB   SATA  -   /c6/e1/slt2  ST3000DM001-9YN166</pre>
+</div></div>
+<div class="paragraph"><p>This implies that it had previously been defined as a unit but could not be recognized as such anymore.
+There is an option that supposedly allows this type of buggered unit to be cleared <em>[Clear Configuration]</em> (in the Web GUI, under Management &#8594; Maintenance, at bottom of page).  However in my case, this did not work.  LSI support gave this explanation:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>Assuming that the drive was connected to a 9000 series [it was],  erasing the last 1024 sectors
+would erase the dcb data, You can use dd to do this but please I am not responsible for
+you erasing your data so make sure that you know which drive dd is running on
+
+Ex:   dd if=/dev/zero  of=/dev/sda bs=512 seek=(sector-size-1024) count=1024
+
+replacing sector-size with actual number of the drive.
+
+cat /sys/block/sda/size should show the actual sector numbers.  Replace /dev/sda with actual device ID
+
+The simpler way is reboot and use 3BM (3ware bios manager) to create a spare.
+Press ALT+3 then select the available drive and press s.</pre>
+</div></div>
+<div class="paragraph"><p>Obviously, in a production system, you can&#8217;t bring the system down to play around with the 3BM.  A support ticket has been lodged with LSI about this.</p></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<img src="./images/icons/note.png" alt="Note">
+</td>
+<td class="content">
+<div class="title">Be careful of what controller you use</div>
+<div class="paragraph"><p>Because &gt;2TB disks are routinely used for large arrays, and because older disk controllers
+are often incapable of handling the larger partition tables or even the raw devices, be careful of what controller you use to write to such disks.  In my case, I initially used an LSI 1068 SAS controller which blithely went ahead and
+did what I asked, failing to write past 2TB with only a short cryptic message.  I should have asked Mr Google about this before using this disk.  As it turned out, I found an Areca 1110 4-port controller which (with a firmware &amp; BIOS update) did support 3TB disks.</p></div>
+<div class="paragraph"><p>It may help to check with dmesg to see if the whole IO stack agrees on what the disks are:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>$ dmesg |grep sd[ab] | grep logical
+[    0.902324] sd 2:0:0:0: [sda] 5860533168 512-byte logical blocks: (3.00 TB/2.72 TiB)
+[    0.902487] sd 2:0:0:1: [sdb] 5860533168 512-byte logical blocks: (3.00 TB/2.72 TiB)</pre>
+</div></div>
+<div class="paragraph"><p>In the end, the approach described by LSI support did work, once the controller could handle a 3TB disk.</p></div>
+</td>
+</tr></table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_clear_a_filesystem_of_gluster_cruft_to_make_a_new_one">2.5.36. Clear a filesystem of gluster cruft to make a new one</h4>
+<div class="paragraph"><p>(from <a href="http://joejulian.name/blog/glusterfs-path-or-a-prefix-of-it-is-already-part-of-a-volume/">Joe Julian</a>)
+Gluster uses extended attributes to set up the filesystem to perform its magic.  You have to:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+stop the gluster volume
+</p>
+</li>
+<li>
+<p>
+delete the gluster volume
+</p>
+</li>
+<li>
+<p>
+stop all gluster daemons
+</p>
+</li>
+<li>
+<p>
+delete the extended attributes
+</p>
+</li>
+<li>
+<p>
+delete the /fs/.glusterfs dir
+</p>
+</li>
+</ul></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre># on all gluster server nodes
+VOLNAME=[thevolname]
+gluster volume stop $VOLNAME
+gluster volume delete $VOLNAME
+/etc/init.d/glusterd stop                # on ALL nodes and check that glusterfsd is also stopped
+setfattr -x trusted.glusterfs.volume-id /raid1
+setfattr -x trusted.glusterfs.volume-id /raid2
+setfattr -x trusted.gfid /raid1 /raid2
+rm -rf /raid[12]/.glusterfs
+
+# now it should be clean, so can init a new glusterfs.
+/etc/init.d/glusterd start   # on all nodes
+# following on 'master' node
+gluster volume create nytro transport tcp 10.2.7.15:/raid1 10.2.7.15:/raid2  10.2.7.16:/raid1 10.2.7.16:/raid2
+gluster volume start nytro</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_gluster_server_overload">2.5.37. Gluster server overload</h4>
+<div class="paragraph"><p>Every once in a while, a gluster server will go into huge overload.  During this time, it will process almost no IO (via ifstat) and therefore it can generally be restarted with few (but not NO) file IO failures.</p></div>
+<div class="paragraph"><p>The following command will restart glusterd and the glusterfsd&#8217;s that run each brick (on our gluster, there are 2 bricks per server)</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>/etc/init.d/glusterd restart
+sleep 15
+ps aux |grep gluster</pre>
+</div></div>
+<div class="paragraph"><p><strong>BUT</strong> make sure that after the restart, ALL the glusterfsd&#8217;s are running.  I&#8217;ve done this and only one of two glusterfsd&#8217;s came up the 1st time. You should see one <em>glusterd</em> and 2 <em>glusterfsd&#8217;s</em></p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>root     11350  0.1  0.0 252788 11244 ?        Ssl  12:37   0:00 /usr/sbin/glusterd --pid-file=/var/run/glusterd.pid
+root     11360  1.0  0.0 870924 19364 ?        Ssl  12:37   0:02 /usr/sbin/glusterfsd -s localhost --volfile-id gl.bs3.raid1 -p /var/lib/glusterd/vols/gl/run/bs3-raid1.pid -S /tmp/2cdf0105a74654b3d162477dd7e25628.socket --brick-name /raid1 -l /var/log/glusterfs/bricks/raid1.log --xlator-option *-posix.glusterd-uuid=cd8ccc7e-4be9-4df3-8c39-f2d1ce76734b --brick-port 24009 24010 --xlator-option gl-server.transport.rdma.listen-port=24010 --xlator-option gl-server.listen-port=24009
+root     11365  1.9  0.0 737800 23300 ?        Ssl  12:37   0:04 /usr/sbin/glusterfsd -s localhost --volfile-id gl.bs3.raid2 -p /var/lib/glusterd/vols/gl/run/bs3-raid2.pid -S /tmp/eaa9f64862d4967e50adacaf34758850.socket --brick-name /raid2 -l /var/log/glusterfs/bricks/raid2.log --xlator-option *-posix.glusterd-uuid=cd8ccc7e-4be9-4df3-8c39-f2d1ce76734b --brick-port 24011 24012 --xlator-option gl-server.transport.rdma.listen-port=24012 --xlator-option gl-server.listen-port=24011</pre>
+</div></div>
+<div class="paragraph"><p>Check with</p></div>
+<div class="paragraph"><p>Generally, files that are in flight or have been marked as written by the controller during this problem may well be lost since the glusterfsd daemons will restart and the IO that they should have processed will be unacknowledged.  On the other hand, to wait to clear all the users and do a smooth total FS shutdown will affect far more users and files.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_weird_question_mark_in_dir_listing">2.5.38. Weird question mark in dir listing</h4>
+<div class="paragraph"><p>this:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>drwxr-xr-x 108 root      root      12288 2012-04-17 18:38 etc
+d?????????   ? ?         ?             ?                ? gl   &lt;!!!!
+drwxr-xr-x 412 root      root      12288 2012-04-17 14:16 home</pre>
+</div></div>
+<div class="paragraph"><p>happens when a dir has been used as a mount point and the mounting device
+has gone awol (in the above case, a gluster volume has been stopped).
+It&#8217;s disconcerting bc there&#8217;s no way to tell what has happened.</p></div>
+<div class="paragraph"><p>The solution is to explicitly umount the dir which will magically cause it
+to be fixed:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre># continuing the above example:
+$ umount /gl
+# ls -ld /gl
+drwxr-xr-x 2 root root 4096 2012-03-18 22:14 /gl</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_restarting_gluster_on_the_pbs_nodes">2.5.39. Restarting gluster on the pbs nodes</h4>
+<div class="paragraph"><p>Because the init scripts are written for RH distros, you can&#8217;t restart gluster
+with the supplied init script in /etc/init.d/glusterfs
+You have to do this:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>apt-get install -y daemon
+daemon --pidfile=/var/run/glusterd.pid /usr/sbin/glusterd</pre>
+</div></div>
+<div class="paragraph"><p>(correction for pbs1 as of Oct, 2012) - you can start glusterd with the init script - I installed daemon)&#8230;</p></div>
+</div>
+<div class="sect3">
+<h4 id="_setting_up_an_xfs_filesystem_with_the_correct_params">2.5.40. Setting up an XFS filesystem with the correct params</h4>
+<div class="paragraph"><p>XFS is a very good filesystem but can be crippled by inappro parameters.
+The script <a href="http://www.mythtv.org/wiki/Optimizing_Performance#XFS-Specific_Tips">mentioned on this page</a>looks to be very good.</p></div>
+<div class="paragraph"><p><a href="http://www.mythtv.org/wiki/Optimizing_Performance#Further_Information">The script itself is here</a></p></div>
+<div class="paragraph"><p><a href="http://www.mysqlperformanceblog.com/2011/12/16/setting-up-xfs-the-simple-edition">and here</a></p></div>
+<div class="paragraph"><p><strong>Also, this:</strong></p></div>
+<div class="paragraph"><p>If your disks are &gt;1TB with XFS then try:
+  mount -o inode64</p></div>
+<div class="paragraph"><p>This has the effect of sequential writes into the same directory being
+localised next to each other (within the same allocation group). When you
+skip to the next directory you will probably get a different allocation
+group.</p></div>
+<div class="paragraph"><p><em>Without this</em>, the behaviour is to:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+stick all the inodes in the first allocation group, and
+</p>
+</li>
+<li>
+<p>
+stick every file into a random allocation group, regardless of the parent directory
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>Also, from the fhgfs wiki pages, they recommend using this set of options:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre> mount -t xfs  -olargeio,inode64,swalloc,noatime,nodiratime,allocsize=131072k,nobarrier /dev/sdX &lt;mountpoint&gt;</pre>
+</div></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>where:</pre>
+</div></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<em>allocsize=131072k</em> for optimal streaming write throughput
+</p>
+</li>
+<li>
+<p>
+<em>noatime,nodiratime</em> for not carrying extra, fairly useless attributes in the inode
+</p>
+</li>
+<li>
+<p>
+<em>nobarrier</em> - don&#8217;t wait for write-thru (use writeback if possible)
+</p>
+</li>
+<li>
+<p>
+<em>largeio</em> - see <em>man mount</em> - automatically references swidth or allocsize for optimum IO.
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>This <a href="http://www.fhgfs.com/wiki/wikka.php?wakka=StorageServerTuning">page from the FHGFS tuning guide</a> is very good.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_settings_for_particular_hardware_raid_controllers">2.5.41. Settings for particular Hardware RAID controllers</h4>
+<div class="paragraph"><p><a href="http://xfs.org/index.php/XFS_FAQ#Q.<em>Which_settings_does_my_RAID_controller_need</em>.3F">This is
+good</a></p></div>
+</div>
+<div class="sect3">
+<h4 id="_repairing_xfs_filesystems">2.5.42. Repairing XFS filesystems</h4>
+<div class="paragraph"><p><a href="http://www.linuxquestions.org/questions/linux-hardware-18/xfs-cannot-read-superblock-521808">From here; very good.</a></p></div>
+<div class="paragraph"><p>"First I mounted /dev/hda3 with the option of -o ro,norecovery. Once mounted
+I backed up the data. After i used xfs_repair -L (this last flag destroys
+the log file in order to be remade by xfs_repair use it with care!!).
+Fortunately it recovered the whole partition without loosing any data."</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>mount -t xfs -r -o no-recovery /dev/sda /data
+# then copy off all the data you can
+# then umount the device
+umount /data
+# then run the very scary
+xfs_repair -L /dev/sda
+# (There's no warning or second chance or 'are you sure'.)</pre>
+</div></div>
+<div class="paragraph"><p><strong>hjm has used this 3x with success; it has always worked. On all 3 times it
+ was on fairly small (100 GB) filesystems, so for very large filesystems, it may take
+a very long time.</strong></p></div>
+</div>
+<div class="sect3">
+<h4 id="_set_quotas_on_an_xfs_filesystem">2.5.43. Set quotas on an XFS filesystem</h4>
+<div class="paragraph"><p><em>man xfs_quota</em> and <a href="http://howto.eyeoncomputers.com/linux/xfs-quota-user/">this page</a></p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>sudo xfs_quota -x -c 'limit bsoft=0 bhard=0 sw' /data</pre>
+</div></div>
+<div class="paragraph"><p>The <em>sw</em> account no longer has a quota:</p></div>
+<div class="paragraph"><p>&lt; sw           1.4T  50.0G  50.0G  00 [-none-]
+---
+&gt; sw           1.4T      0      0  00 [------]</p></div>
+</div>
+<div class="sect3">
+<h4 id="_clear_file_cache_for_testing">2.5.44. Clear file cache for testing</h4>
+<div class="paragraph"><p>Executed as root, this will have a huge momentary hit on performance since it will cause all the cache for all users and all apps to flush.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>sync &amp;&amp; echo 1 &gt; /proc/sys/vm/drop_caches
+# also can use 1, 2, or 3 - mean different things.</pre>
+</div></div>
+<div class="paragraph"><p>The full set (as described in <a href="http://www.kernel.org/doc/Documentation/sysctl/vm.txt">the appro kernel doc</a> is:</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>drop_caches</pre>
+</div></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>Writing to this will cause the kernel to drop clean caches, dentries and
+inodes from memory, causing that memory to become free.</pre>
+</div></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>To free pagecache:
+        echo 1 &gt; /proc/sys/vm/drop_caches
+To free dentries and inodes:
+        echo 2 &gt; /proc/sys/vm/drop_caches
+To free pagecache, dentries and inodes:
+        echo 3 &gt; /proc/sys/vm/drop_caches</pre>
+</div></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>As this is a non-destructive operation and dirty objects are not freeable, the
+user should run `sync' first.</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_reconfig_postfix">2.5.45. Reconfig postfix</h4>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>sudo dpkg-reconfigure postfix</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_missing_keys_in_debian_ubuntu">2.5.46. Missing keys in Debian/Ubuntu</h4>
+<div class="paragraph"><p>To fix the missing key error:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>Fetched 1216kB in 2s (419kB/s)
+Reading package lists... Done
+W: GPG error: http://ppa.launchpad.net hardy Release: The following
+signatures couldn't be verified because the public key is not available:
+NO_PUBKEY 2A8E3034D018A4CE</pre>
+</div></div>
+<div class="paragraph"><p>do this as YOURSELF</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>export THEKEY='' # like '2A8E3034D018A4CE' (from above)  or whatever it is
+gpg --keyserver subkeys.pgp.net --recv ${THEKEY}
+gpg --export --armor ${THEKEY} | sudo apt-key add -</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_to_address_the_matter_of_gpg_errors">2.5.47. To address the matter of GPG errors</h4>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>like:</pre>
+</div></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>W: GPG error: http://download.virtualbox.org lucid Release: The following
+signatures were invalid: BADSIG 54422A4B98AB5139 Oracle Corporation
+(VirtualBox archive signing key) &lt;info@virtualbox.org&gt;</pre>
+</div></div>
+<div class="paragraph"><p>you have to clean out the lists dir and regenerate it.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>apt-get clean
+cd /var/lib/apt
+mv lists lists.old
+mkdir -p lists/partial
+apt-get clean
+apt-get update</pre>
+</div></div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_networking">2.6. Networking</h3>
+<div class="sect3">
+<h4 id="_route_packets_thru_dual_homed_machine">2.6.1. Route packets thru dual-homed machine</h4>
+<div class="paragraph"><p>If you need to route to a remote network via a dual-homed machine, this works for all <em>eth0</em> connected nodes:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>ip route add 192.5.19.0/24 via 10.1.254.196 dev eth0</pre>
+</div></div>
+<div class="paragraph"><p>The above is a temp-only fix; will not work on the next reboot.
+In order to make it permanent, will need to add this:</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>192.5.19.0/24 via 10.1.254.196
+to
+/etc/sysconfig/network-scripts/route-eth0</pre>
+</div></div>
+<div class="paragraph"><p>and/or the reboot image.</p></div>
+<div class="paragraph"><p>Send that to all nodes with clusterfork like this:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>cf --target=computeup 'echo "192.5.19.0/24 via 10.1.254.196" &gt;&gt; /etc/sysconfig/network-scripts/route-eth0'</pre>
+</div></div>
+<div class="paragraph"><p>where <em>computeup</em> is a group designation derived from querying the SGE system as to which hosts report being up.</p></div>
+<div class="paragraph"><p><a href="https://my.esecuredata.com/index.php?/knowledgebase/article/2/add-a-static-route-on-centos">See also</a></p></div>
+</div>
+<div class="sect3">
+<h4 id="_recursively_copy_remote_dirs_w_commandline">2.6.2. Recursively copy remote dirs w/ commandline</h4>
+<div class="paragraph"><p>Use <em>lftp</em></p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>lftp sftp://username@analysis.com
+Password:
+lftp username@analysis.com:~&gt; mirror
+# (gets everything)</pre>
+</div></div>
+<div class="paragraph"><p>Also can use <em>scp</em>.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_recursive_wget">2.6.3. Recursive wget</h4>
+<div class="paragraph"><p>Ignoring 'robots.txt (heh)</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>wget -e robots=off --wait 1 http://your.site.here</pre>
+</div></div>
+<div class="paragraph"><p>See <a href="http://codenimbus.com/2010/08/02/override-robots-txt-with-wget/">this link</a>.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_ldap_lookups_at_uci">2.6.4. LDAP lookups at UCI</h4>
+<div class="paragraph"><p><em>dapper.sh</em></p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-style: italic"><span style="color: #9A1900">#!/bin/bash</span></span>
+<span style="font-weight: bold"><span style="color: #0000FF">if</span></span> <span style="color: #990000">[</span> <span style="color: #FF0000">"$1"</span> <span style="color: #990000">=</span> <span style="color: #FF0000">""</span> <span style="color: #990000">];</span> <span style="font-weight: bold"><span style="color: #0000FF">then</span></span>
+  <span style="color: #009900">bn</span><span style="color: #990000">=</span>`basename <span style="color: #009900">$0</span>`
+  echo <span style="color: #FF0000">"Usage:    $bn 'file of UCINETIDs' (one per line)"</span>
+  <span style="font-weight: bold"><span style="color: #0000FF">exit</span></span>
+<span style="font-weight: bold"><span style="color: #0000FF">fi</span></span>
+<span style="font-weight: bold"><span style="color: #0000FF">while</span></span> <span style="font-weight: bold"><span style="color: #0000FF">read</span></span> USR<span style="color: #990000">;</span> <span style="font-weight: bold"><span style="color: #0000FF">do</span></span>
+    echo <span style="color: #FF0000">""</span> <span style="color: #990000">|</span> tee -a ldap<span style="color: #990000">.</span>results
+    echo -n <span style="color: #FF0000">"$USR: "</span> <span style="color: #990000">|</span> tee -a ldap<span style="color: #990000">.</span>results
+    <span style="color: #009900">UU</span><span style="color: #990000">=</span>`ldapsearch -H ldap<span style="color: #990000">:</span>//ldap<span style="color: #990000">.</span>oit<span style="color: #990000">.</span>uci<span style="color: #990000">.</span>edu<span style="color: #990000">:</span><span style="color: #993399">389</span> -x -b <span style="color: #FF0000">"ou=people,dc=uci,dc=edu"</span> <span style="color: #FF0000">"uid=${USR}"</span><span style="color: #990000">\</span>
+    <span style="color: #FF0000">"displayName"</span> <span style="color: #FF0000">"department"</span> <span style="color: #FF0000">"facultyLevel"</span> <span style="color: #FF0000">"title"</span> <span style="color: #990000">\</span>
+    <span style="color: #990000">|</span> egrep <span style="color: #FF0000">"^dep"</span><span style="color: #990000">\|</span><span style="color: #FF0000">"^fac"</span><span style="color: #990000">\|</span><span style="color: #FF0000">"^ti"</span><span style="color: #990000">\|</span><span style="color: #FF0000">"^dis"</span> <span style="color: #990000">|</span> cut -f<span style="color: #993399">2</span> -d<span style="color: #990000">:</span> <span style="color: #990000">|</span> tr <span style="color: #FF0000">'</span><span style="color: #CC33CC">\n</span><span style="color: #FF0000">'</span> <span style="color: #FF0000">':'</span>`
+    <span style="font-weight: bold"><span style="color: #0000FF">if</span></span> <span style="color: #990000">[</span> <span style="color: #FF0000">"xx${UU}xx"</span> <span style="color: #990000">=</span> <span style="color: #FF0000">"xxxx"</span> <span style="color: #990000">];</span> <span style="font-weight: bold"><span style="color: #0000FF">then</span></span>
+        echo -n <span style="color: #FF0000">"no LDAP record"</span> <span style="color: #990000">|</span> tee -a ldap<span style="color: #990000">.</span>results
+    <span style="font-weight: bold"><span style="color: #0000FF">else</span></span>
+        echo -n <span style="color: #FF0000">".."</span>
+        echo -n <span style="color: #009900">$UU</span> <span style="color: #990000">&gt;&gt;</span> ldap<span style="color: #990000">.</span>results
+    <span style="font-weight: bold"><span style="color: #0000FF">fi</span></span>
+    sleep <span style="color: #993399">0.2</span>
+<span style="font-weight: bold"><span style="color: #0000FF">done</span></span> <span style="color: #990000">&lt;</span> <span style="color: #009900">$1</span></tt></pre></div></div>
+<div class="paragraph"><p>and then feed it a file of usernames:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>./dapper.sh file_of_names</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_what_is_my_remote_hostname">2.6.5. What is my remote hostname?</h4>
+<div class="paragraph"><p>To get your remote name/IP number for entry into an ACL or other such requirement, if you can log into anther host, the command <em>last -ad</em> will give you the perceived name from the remote host&#8217;s POV - see the last field.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>Tue Dec 24 11:01:26 [0.27 0.19 0.16]  hjm@moo:~
+504 $ last -ad
+hjm      pts/18       Tue Dec 24 11:00   still logged in    ip68-109-196-185.oc.oc.cox.net
+...</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_how_to_ssh_to_a_remote_linux_pc_behind_a_nat">2.6.6. How to ssh to a remote Linux PC behind a NAT</h4>
+<div class="paragraph"><p>Requires a <em>middleman</em> host (goo) and someone (ctm) at the remote PC.</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+have the remote user (ctm) ssh to the middleman host
+</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>ssh -R 10002:localhost:22 ctm@goo.net.some.com</pre>
+</div></div>
+</li>
+<li>
+<p>
+you ssh to the same host normally
+</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>ssh you@goo.net.some.com</pre>
+</div></div>
+</li>
+<li>
+<p>
+you use/hijack ctm&#8217;s ssh session via tunneling
+</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>ssh ctm@localhost -p 10002</pre>
+</div></div>
+</li>
+</ul></div>
+<div class="paragraph"><p>In the above line, you are now logging onto the REMOTE PC, so use the appro <em>username</em> for the REMOTE PC, not nec <em>ctm</em> (if the <em>ctm</em> user has the same account name on the REMOTE PC).  You have to have ctm&#8217;s password on his remote PC or have your own account there already.</p></div>
+<div class="paragraph"><p>Now you&#8217;re logged into ctm&#8217;s REMOTE PC even tho it&#8217;s behind a NAT.
+Original page describing this <a href="http://www.marksanborn.net/howto/bypass-firewall-and-nat-with-reverse-ssh-tunnel/">is here</a>.</p></div>
+</div>
+<div class="sect3">
+<h4 id="pwlssh">2.6.7. passwordless ssh</h4>
+<div class="paragraph"><p>Why can&#8217;t I remember this?</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre># for no passphrase, use
+ssh-keygen -b 1024 -N ""
+
+# if you want to use a passphrase:
+ssh-keygen -b 1024 -N "your passphrase"
+# but you probably /don't/ want a passphrase - else why would you be going thru this?</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="fixbrokenx2go">2.6.8. How to fix broken 2goserver</h4>
+<div class="paragraph"><p>This has come up repeatedly, so here&#8217;s an attempt to address it.  After x2go has been working OK for a while, a reset/reboot will cause it to fail. Sometimes it&#8217;s as simple as a hung session, in which case deleting the old x2go session information from your ~/.x2go dir will fix it.  Sometimes it seems that it is much harder - there have been 2 approaches that seem to have fixed it previously</p></div>
+<div class="paragraph"><p><strong>Missing required dir:</strong>  Check to see if the x2goserver machine still has a /tmp/.X11-unix dir and that it is still chmod&#8217;ed OK. It has to be owned by <em>root.root</em></p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>mkdir -p /tmp/.X11-unix
+chown root.root /tmp/.X11-unix
+chmod 1777 /tmp/.X11-unix</pre>
+</div></div>
+<div class="paragraph"><p>The above has fixed the problem on 2 machines.</p></div>
+<div class="paragraph"><p><strong>Missing NX libs:</strong>  Don&#8217;t know if this somehow overlaps with the first solution, but installing all the libNX libs has solved it previously as well.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>yum install libNX*  # this is probably too many (there are ~60 pf these libs)</pre>
+</div></div>
+<div class="paragraph"><p>However, it did solve it once.  Try the 1st solution first.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_x2go_problem_em_cannot_establish_any_listening_sockets_em">2.6.9. x2go problem: <em>Cannot establish any listening sockets</em></h4>
+<div class="paragraph"><p>On CentOS 6.5, we&#8217;ve run int this error:</p></div>
+<div class="paragraph"><p><strong>Error: Aborting session with <em>Cannot establish any listening sockets - Make sure an X server isn&#8217;t already running</em>.</strong></p></div>
+<div class="paragraph"><p>The answer seems to be that the packages are placed in the wrong places.  To fix it,
+execute the following as root on the cluster-side machine.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>  mv /usr/libexec/x2go/* /usr/lib64/x2go
+  rm -Rf /usr/libexec/x2go
+  ln -s /usr/lib64/x2go /usr/libexec/x2go
+  service x2gocleansessions start
+  chkconfig x2gocleansessions on</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_monitor_wifi_signal_strength">2.6.10. Monitor wifi signal strength</h4>
+<div class="paragraph"><p>Sometimes you want to know what the actual stats are for your wireless signal (new hotspot, testing new antenna, etc.
+The stats are updated continuously in <em>/proc/net/wireless</em>, so all you have to do is <em>watch</em> them.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>watch -n 1 cat /proc/net/wireless</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_enabling_x11_when_sudoing">2.6.11. Enabling X11 when sudoing</h4>
+<div class="paragraph"><p>As the regular user:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>hjm@flip:/home/hjm
+$ xauth list
+flip.nac.uci.edu/unix:10  MIT-MAGIC-COOKIE-1 c67b142a7df14f1aa5ed93f4a4e2b660</pre>
+</div></div>
+<div class="paragraph"><p>then <em>sudo bash</em> and add that xauth info to root&#8217;s xauth:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>root@flip:/home/hjm
+$ xauth add flip.nac.uci.edu/unix:10  MIT-MAGIC-COOKIE-1 c6df14142a75ed93ff1aa7b4a4e2b660</pre>
+</div></div>
+<div class="paragraph"><p>Now it should work.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_using_netcat_nc_to_transfer_data">2.6.12. Using netcat (nc) to transfer data</h4>
+<div class="paragraph"><p>Note that this section has been expanded into a full document about <a href="http://moo.nac.uci.edu/~hjm/HOWTO_move_data.html">How to Move Data Fast</a>
+Instead of using <strong>scp</strong> which has an encryption overhead, you can also use
+<strong>nc</strong>.</p></div>
+<div class="paragraph"><p>On the local (sending) host (bongo.nac.uci.edu in this example):</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>[sending] % pv -pet HG-U133_Plus_2.na26.annot.csv | nc -l -p 1234 &lt;enter&gt;</pre>
+</div></div>
+<div class="paragraph"><p>The command will hang, listening (-l) for a connection from the other end.</p></div>
+<div class="paragraph"><p>on receiving host:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>[receiving] % nc bongo.nac.uci.edu 1234 |pv -b &gt;test.file  &lt;enter&gt;</pre>
+</div></div>
+<div class="paragraph"><p>(note: no <em>-p</em> on the rec side)</p></div>
+</div>
+<div class="sect3">
+<h4 id="_how_to_set_up_networking_on_a_ubuntu_ibex_system">2.6.13. How to set up networking on a Ubuntu Ibex system</h4>
+<div class="paragraph"><p>It&#8217;s fairly well-known that the KDE4 Network Manager is broken.  This is how
+to get networking started on such a machine.
+see
+<a href="http://www.ubuntugeek.com/how-to-set-a-static-ip-address-in-ubuntu-810-intrepid-ibex.html">this
+howto</a> which tells how fairly well.  The following is a quick extract.</p></div>
+<div class="paragraph"><p>Edit  <strong>/etc/network/interfaces</strong></p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>auto lo eth0
+ iface lo inet loopback
+ iface eth0 inet static
+ address xxx.xxx.xxx.xxx(enter your ip here)
+ netmask xxx.xxx.xxx.xxx
+ gateway xxx.xxx.xxx.xxx(enter gateway ip here)</pre>
+</div></div>
+<div class="paragraph"><p>Edit <strong>/etc/resolv.conf</strong></p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre># Generated by NetworkManager
+nameserver xxx.xxx.xxx.xxx(enter your dns server ip)
+nameserver xxx.xxx.xxx.xxx(enter your alt dns server ip)</pre>
+</div></div>
+<div class="paragraph"><p>Restart the networking</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>sudo /etc/init.d/networking restart</pre>
+</div></div>
+<div class="paragraph"><p>And finally, remove the effin broken Network Manager</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>apt-get remove network-manager network-manager-kde</pre>
+</div></div>
+<div class="paragraph"><p># then install netgo</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>apt-get install netgo</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_how_to_set_an_ip_address_with_ifconfig">2.6.14. How to set an IP address with ifconfig</h4>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>ifconfig ethX 128.200.15.22 netmask 255.255.255.0 broadcast 128.200.15.255 up
+#         if     address    +----- optional (defaults should work -------+</pre>
+</div></div>
+<div class="paragraph"><p>BUT!  <em>ifconfig</em> is deprecated in favor of the <em>ip</em> command.
+<a href="http://www.techrepublic.com/article/pro-tip-use-the-ip-command-in-favor-of-the-deprecated-ifconfig/">Some examples of using it are here</a></p></div>
+<div class="paragraph"><p>especially setting ethernet addresses:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>ip link set dev eth0 down         # bring down a dev
+ip -s -s a f to 192.168.10.0/24   # set the address of a dev
+ip link set dev eth0 up            # bring up a dev</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_force_ib_into_connected_mode">2.6.15. force IB into connected mode</h4>
+<div class="paragraph"><p>To set the MTU to 64K:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>echo connected &gt; /sys/class/net/ib0/mode</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_infiniband_kernel_modules_to_load">2.6.16. Infiniband kernel modules to load</h4>
+<div class="paragraph"><p>Add the following to the initrd, or to the <em>/etc/modules.conf</em> file.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>  rdma_ucm
+  rdma_cm
+  ib_addr
+  ib_ipoib
+  mlx4_core
+  mlx4_ib
+  mlx4_en
+  mlx5_core
+  mlx5_ib
+  ib_uverbs
+  ib_umad
+  ib_ucm
+  ib_sa
+  ib_cm
+  ib_mad
+  ib_core
+  ib_mthca</pre>
+</div></div>
+<div class="paragraph"><p>test with ibstat, ibswitches, etc</p></div>
+</div>
+<div class="sect3">
+<h4 id="_bandwidth_test_via_rdma">2.6.17. Bandwidth test via RDMA</h4>
+<div class="paragraph"><p>You can test the bandwith of the link using the ib_rdma_bw command.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>node1# ib_rdma_bw
+ # and then start a client on another node, giving it the hostname of the server.
+node2# ib_rdma_bw  node1</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_set_up_ip_forwarding_in_4_easy_steps">2.6.18. Set up IP forwarding in 4 easy steps.</h4>
+<div class="paragraph"><p><a href="http://www.revsys.com/writings/quicktips/nat.html">See here for original page.</a></p></div>
+<div class="paragraph"><p>This assumes public interface on eth1; private on eth0 (reverse of usual case).</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>echo 1 &gt; /proc/sys/net/ipv4/ip_forward
+/sbin/iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE
+/sbin/iptables -A FORWARD -i eth1 -o eth0 -m state --state RELATED,ESTABLISHED -j ACCEPT
+/sbin/iptables -A FORWARD -i eth0 -o eth1 -j ACCEPT</pre>
+</div></div>
+<div class="paragraph"><p>This will set up the NAT, but to make it permanent (to survive a reboot), , refer to the page above for full instructions.  This is the short version. You will need to edit <em>/etc/sysctl.conf</em> and change the line that says</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre> net.ipv4.ip_forward = 0
+to
+ net.ipv4.ip_forward = 1</pre>
+</div></div>
+<div class="paragraph"><p>Notice how this is similar to step number one? This essentially tells your kernel to do step one on boot.</p></div>
+<div class="paragraph"><p>Last step for Fedora/RHEL users. In order for your system to save the iptables rules we setup in step two you have to configure iptables correctly. You will need to edit <em>/etc/sysconfig/iptables-config</em> and make sure <strong>IPTABLES_MODULES_UNLOAD</strong>, <strong>IPTABLES_SAVE_ON_STOP</strong>, and <strong>IPTABLES_SAVE_ON_RESTART</strong> are all set to <em>yes</em>.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_sshouting">2.6.19. SSHouting</h4>
+<div class="paragraph"><p>Now a separate document: <a href="http://moo.nac.uci.edu/~hjm/SSHoutingWithSsh.html">SSHouting with ssh</a></p></div>
+</div>
+<div class="sect3">
+<h4 id="_remove_the_bad_rsa_dsa_host_keys">2.6.20. Remove the bad RSA/DSA host keys</h4>
+<div class="paragraph"><p>When inititating ssh to a new system or to one which has had significant
+changes made to it to the extent that it refuses your attempts to ssh in,
+you can use this line to delete the offending problem line:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>...
+Offending RSA key in /home/hjm/.ssh/known_hosts:325
+  remove with: ssh-keygen -f "/home/hjm/.ssh/known_hosts" -R stunted</pre>
+</div></div>
+<div class="paragraph"><p>Or just delete the entire <em>/home/hjm/.ssh/known_hosts</em> fil - it will just re-populate as you go..</p></div>
+</div>
+<div class="sect3">
+<h4 id="_set_up_a_specific_gateway_for_a_specific_route">2.6.21. Set up a specific gateway for a specific route</h4>
+<div class="paragraph"><p>Below example is taken from BDUC:claw9 which needed to have an explicit
+route set to avoid traversing the public net to run MPI applications across
+the split cluster.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre># explicitly set the route for ICS subcluster here
+# (assuming eth0 stays eth0 / 10.255.78.94)
+/sbin/route add -net 10.255.89.0/24 gw 10.255.78.1 dev eth0</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_how_to_ssh_tunnel_a_windows_machine">2.6.22. How to ssh-tunnel a Windows machine</h4>
+<div class="paragraph"><p><a href="http://www.devdaily.com/unix/edu/putty-ssh-tunnel-firefox-socks-proxy/1-putty-ssh-tunnel-introduction.shtml">http://www.devdaily.com/unix/edu/putty-ssh-tunnel-firefox-socks-proxy/1-putty-ssh-tunnel-introduction.shtml</a></p></div>
+</div>
+<div class="sect3">
+<h4 id="_how_to_tell_who_8217_s_hammering_your_nfs_network">2.6.23. How to tell who&#8217;s hammering your NFS network</h4>
+<div class="paragraph"><p>1st, figure out which interface is getting hit with ifstat (DO NOT need to be
+root).</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>$ ifstat
+       eth0                eth1
+ KB/s in  KB/s out   KB/s in  KB/s out
+    2.99   1268.18  80426.50   3629.40
+    4.74    435.89  35832.20   1739.31
+    1.56   2668.27  81236.53   3531.31
+    9.63    899.82  25380.89    707.71
+    1.30   1371.96  70618.32   3184.92
+^C</pre>
+</div></div>
+<div class="paragraph"><p>OK - it looks like it&#8217;s eth1 (also will work with IB interfaces).</p></div>
+<div class="paragraph"><p>Now, who&#8217;s using that bandwidth?</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre> $ nfswatch -auth -dev eth1
+
+bduc-login.nacs.uci.edu     Thu May 24 12:45:41 2012   Elapsed time:   00:00:20
+Interval packets:    533769 (network)     349512 (to host)          0 (dropped)
+Total packets:      1077566 (network)     705313 (to host)          0 (dropped)
+                     Monitoring packets from interface eth1
+                     int   pct    total                      int   pct    total
+NFS3 Read          15241    4%    29957 TCP Packets       349266  100%   704793
+NFS3 Write          5401    2%     9914 UDP Packets          239    0%      508
+NFS Read               0    0%        0 ICMP Packets           0    0%        0
+NFS Write              0    0%        0 Routing Control        0    0%        0
+NFS Mount              0    0%        3 Addr Resolution        1    0%        1
+Port Mapper            1    0%        6 Rev Addr Resol         0    0%        0
+RPC Authorization     29    0%       62 Ether/FDDI Bdcst       3    0%        3
+Other RPC Packets    711    0%     1481 Other Packets          6    0%       11
+                                12 authenticators
+Authenticator        int   pct    total Authenticator        int   pct    total
+AUTH_NULL              0    0%        1 ridrogol               6    0%       14
+calvinjs           14122   68%    27563 root                  84    0%      205
+dasher               722    3%     1412 spoorkas             377    2%      779
+jiew5                  2    0%        2 tkim15              3554   17%     6132
+nkp                 1596    8%     3296 tvanerp              197    1%      506
+resteele               1    0%        1 xtian                 62    0%      125</pre>
+</div></div>
+<div class="olist loweralpha"><ol class="loweralpha">
+<li>
+<p>
+and the display will update every 10s or whatever you set with the <em>-t</em> flag
+<em>&lt;</em> and <em>&gt;</em> in the display will decrease and increase cycle time.
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>In the above display, it looks like <em>calvinjs</em> is the culprit.</p></div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_users_and_groups">2.7. Users and Groups</h3>
+<div class="sect3">
+<h4 id="_user_and_group_ids">2.7.1. User and Group ids</h4>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>$ id hmangala
+uid=7003(hmangala) gid=7003(hmangala)
+groups=7003(hmangala),7434(mortazavi),5001(gpu),5004(psygene),5000(gaussian),7240(dshanthi),5002(charmm),7282(galaxy),5003(vasanlab),115(admin)
+
+$ getent group mortazavi
+mortazavi:!:7434:seyedam,eddiep,rmurad,ricardnr,zengw,hmangala</pre>
+</div></div>
+<div class="paragraph"><p>NB: <em>getent</em> only greps thru the <em>/etc/group</em> file, so if your <em>/etc/group</em> is incomplete, it won&#8217;t return valid info.
+ie: on HPC, the <em>/etc/group</em> is only used to declare groups, not to define them (done in <em>/etc/passwd</em>)</p></div>
+<div class="paragraph"><p>Or even better, use <em>lid</em> or <em>lid -g</em> as root:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>$ lid -g gene
+ mfumagal(uid=928)
+ rkmadduri(uid=930)
+ mtyagi(uid=931)
+ clarkusc(uid=937)
+ fmacciar(uid=787)
+ ftorri(uid=768)
+ bhjelm(uid=1374)</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_changing_users_group_membership">2.7.2. Changing Users group membership</h4>
+<div class="paragraph"><p>if you need to add a group:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>groupadd newgroup</pre>
+</div></div>
+<div class="paragraph"><p>if you need to change group membership of an existing user,
+<em>gpasswd</em> is very useful</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>gpasswd -d cruz  bio    # deletes cruz from the 'bio' group
+gpasswd -a cruz  som    # adds cruz to the 'som' group
+
+# following also adds a user to an existing group
+usermod -a -G som cruz     # adds cruz to the 'som' group
+
+# and on HPC, have to run:
+ /data/system-files/ge-linux-groups-setup.sh
+to force a sync from the linux groups to the SGE groups to set the Queue permissions.</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_remove_a_user_completely">2.7.3. Remove a user completely</h4>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>userdel user  # removes account - for HPC, only on HPC-S
+
+userdel -r user # removes account and HOME dir
+
+# but on HPC,  still have to remove user dirs on /pub, /bio, /som, etc</pre>
+</div></div>
+<div class="paragraph"><p><a href="http://www.computerhope.com/unix/userdel.htm">Webified man page</a> and
+<a href="http://www.cyberciti.biz/faq/linux-remove-user-command/">some examples</a>.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_force_a_user_to_logout">2.7.4. Force a user to logout</h4>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>pkill -KILL -u username</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_kerberos_init_failure_on_debian_ubuntu">2.7.5. Kerberos init failure on Debian/Ubuntu</h4>
+<div class="paragraph"><p>kerberos requires that the realm be initialized on the node before the
+krb5kdc can start.  If that&#8217;s not the case, you&#8217;ll get the unhelpful error:
+<strong>File not found</strong>.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_prep_a_new_system_for_me">2.7.6. Prep a new system for ME</h4>
+<div class="paragraph"><p>(this is for <em>me</em>, Harry Mangalam, and will therefore almost certainly fail
+for anyone else).</p></div>
+<div class="paragraph"><p>DO NOT MOUSE THIS INTO A TERM IN ONE GO.  IT WILL FAIL.
+copy stanza by stanza</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>host=   # set up the HOSTNAME 1st
+user=hjm # &lt;your_username_on $host&gt;
+ssh-copy-id ${user}@${host}
+
+cd # make sure we're at ~
+ssh  ${user}@${host} 'mkdir -p bin'
+cd bin; scp scut cols ${user}@${host}:~/bin; cd
+scp -r .bashrc .profile .alias.bash .nedit .DirB .bashDirB ${user}@${host}:~
+
+
+# now ssh there and add the missing stuff you'll need
+sudo apt-get install -y joe nedit
+# add yourself to the sudo group
+sudo joe /etc/sudoers
+
+%admin  ALL=NOPASSWD: ALL         # older Debian derivs
+%sudo   ALL=NOPASSWD: ALL         # newer Debian derivs !! not for production machines !!
+
+%wheel  ALL=(ALL)  NOPASSWD: ALL  # RH derivs
+
+# then...
+ssh -t  ${user}@${host} 'sudo apt-get install -y libstatistics-descriptive-perl gconf2' # for scut
+# or if it's a RH-based system
+# ssh -t  ${user}@${host} 'sudo yum -y install perl-Statistics-Descriptive.noarch gconf2'
+
+#NB: 'yum repolist' will list all the repos active:</pre>
+</div></div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_bash_tips_and_tricks">2.8. Bash tips and tricks</h3>
+<div class="sect3">
+<h4 id="_read_a_file_line_by_line">2.8.1. Read a file line by line</h4>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">filename</span><span style="color: #990000">=</span>myinput<span style="color: #990000">.</span>txt  <span style="font-style: italic"><span style="color: #9A1900"># or just feed it in explicitly</span></span>
+<span style="font-weight: bold"><span style="color: #0000FF">while</span></span> <span style="font-weight: bold"><span style="color: #0000FF">read</span></span> line   <span style="font-style: italic"><span style="color: #9A1900"># string of newline-terminated ends up in $line</span></span>
+<span style="font-weight: bold"><span style="color: #0000FF">do</span></span>
+    <span style="font-style: italic"><span style="color: #9A1900"># Do what you want to $line</span></span>
+<span style="font-weight: bold"><span style="color: #0000FF">done</span></span> <span style="color: #990000">&lt;</span> <span style="color: #009900">$filename</span>
+
+<span style="font-style: italic"><span style="color: #9A1900"># next line takes a file of fully qualified filenames and produces the basename in 'less'</span></span>
+<span style="color: #990000">(</span><span style="font-weight: bold"><span style="color: #0000FF">while</span></span> <span style="font-weight: bold"><span style="color: #0000FF">read</span></span> line<span style="color: #990000">;</span> <span style="font-weight: bold"><span style="color: #0000FF">do</span></span> basename <span style="color: #009900">$line</span><span style="color: #990000">;</span> <span style="font-weight: bold"><span style="color: #0000FF">done</span></span><span style="color: #990000">)</span> <span style="color: #990000">&lt;</span> fastq<span style="color: #990000">.</span>gz<span style="color: #990000">.</span>names <span style="color: #990000">|</span> less
+</tt></pre></div></div>
+<div class="paragraph"><p>See <a href="https://goo.gl/PYSfkH">here</a> for more exposition.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_backtics_vs_expression">2.8.2. Backtics vs $(expression)</h4>
+<div class="paragraph"><p>A user asked why a bash expression would work from the commandline but not inside backtics:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>$ grep rs somefile <span style="color: #990000">|</span> awk -F<span style="color: #990000">\\</span>t <span style="color: #FF0000">' { print $2 } '</span> <span style="color: #990000">|</span> awk -F<span style="color: #990000">\</span>_ <span style="color: #FF0000">' { print $1 } '</span> <span style="color: #990000">|</span> grep -v rs <span style="color: #990000">|</span> sort <span style="color: #990000">|</span> uniq
+<span style="font-style: italic"><span style="color: #9A1900">#  note the backslashes    ^^                           ^</span></span>
+
+<span style="font-style: italic"><span style="color: #9A1900"># above cmd produced:</span></span>
+mnp
+psy
+seq
+seq2
+seq3
+seq4
+unp
+
+but the version that uses backtics did not<span style="color: #990000">:</span>
+$ <span style="color: #009900">a</span><span style="color: #990000">=</span>`grep rs somefile <span style="color: #990000">|</span> awk -F<span style="color: #990000">\\</span>t <span style="color: #FF0000">' { print $2 } '</span> <span style="color: #990000">|</span> awk -F<span style="color: #990000">\</span>_ <span style="color: #FF0000">' { print $1 } '</span> <span style="color: #990000">|</span> grep -v rs <span style="color: #990000">|</span> sort <span style="color: #990000">|</span> uniq`
+$ echo <span style="color: #009900">$a</span>
+<span style="color: #990000">(</span>nothing<span style="color: #990000">)</span>
+
+<span style="font-style: italic"><span style="color: #9A1900"># however using the $() variant:</span></span>
+$ <span style="color: #009900">a</span><span style="color: #990000">=</span><span style="color: #009900">$(</span>grep rs somefile <span style="color: #990000">|</span> awk -F<span style="color: #990000">\\</span>t <span style="color: #FF0000">' { print $2 } '</span> <span style="color: #990000">|</span> awk -F<span style="color: #990000">\</span>_ <span style="color: #FF0000">' { print $1 } '</span> <span style="color: #990000">|</span> grep -v rs <span style="color: #990000">|</span> sort <span style="color: #990000">|</span> uniq<span style="color: #990000">)</span>
+
+<span style="font-style: italic"><span style="color: #9A1900"># produces:</span></span>
+$ echo <span style="color: #009900">$a</span>
+mnp psy seq seq2 seq3 seq4 unp</tt></pre></div></div>
+<div class="paragraph"><p>The explanation from Garr:</p></div>
+<div class="paragraph"><p>Both of these <a href="http://stackoverflow.com/questions/9449778/what-is-the-benefit-of-using-instead-of-backticks-in-shell-scripts">first two main responses</a> are interesting:</p></div>
+<div class="paragraph"><p>The first speaks to $() helping with nesting.  The second speaks to all the backslashes necessary with back-ticks.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_filename_processing">2.8.3. filename processing</h4>
+<div class="paragraph"><p>Bash is a horrible language for anything other than job control (and it&#8217;s not great at
+that), but it can be made to do crude regex and string processing in the pursuit of
+filename modification.</p></div>
+<div class="paragraph"><p><strong>Modifying the prefix and suffix of filenames</strong></p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+rename files beginning with <em>ChrM_</em> to the rest of  the filename, ie deleting the ‘chrM_’ prefix from all files.
+</p>
+</li>
+</ul></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">prefix</span><span style="color: #990000">=</span><span style="color: #FF0000">"ChrM_"</span>
+<span style="color: #009900">lenprefix</span><span style="color: #990000">=</span><span style="color: #009900">${#prefix}</span>  <span style="font-style: italic"><span style="color: #9A1900"># note the format: ${#string} -&gt; length of string</span></span>
+<span style="font-weight: bold"><span style="color: #0000FF">for</span></span> II <span style="font-weight: bold"><span style="color: #0000FF">in</span></span> <span style="color: #009900">${prefix}</span><span style="color: #990000">*;</span> <span style="font-weight: bold"><span style="color: #0000FF">do</span></span>
+  echo -n <span style="color: #FF0000">"$II -&gt; "</span><span style="color: #990000">;</span>
+  <span style="color: #009900">chopped</span><span style="color: #990000">=</span><span style="color: #009900">${II:5}</span><span style="color: #990000">;</span> <span style="font-style: italic"><span style="color: #9A1900"># uses the character offset reference</span></span>
+  echo <span style="color: #FF0000">"$chopped"</span><span style="color: #990000">;</span>
+  <span style="font-style: italic"><span style="color: #9A1900"># mv $II $chopped;  # this does the actual renaming.</span></span>
+                      <span style="font-style: italic"><span style="color: #9A1900"># uncomment when you're sure it works correctly</span></span>
+<span style="font-weight: bold"><span style="color: #0000FF">done</span></span></tt></pre></div></div>
+<div class="ulist"><ul>
+<li>
+<p>
+do the same thing as above, but <strong>recursively</strong>.
+</p>
+</li>
+</ul></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #0000FF">shopt</span></span> -s globstar         <span style="font-style: italic"><span style="color: #9A1900"># sets the recursive bash search</span></span>
+<span style="color: #009900">prefix</span><span style="color: #990000">=</span><span style="color: #FF0000">"asfiw"</span>            <span style="font-style: italic"><span style="color: #9A1900"># assign to a var to make it more portable</span></span>
+<span style="color: #009900">lenprefix</span><span style="color: #990000">=</span><span style="color: #009900">${#prefix}</span>      <span style="font-style: italic"><span style="color: #9A1900"># get the length of the prefix</span></span>
+<span style="font-weight: bold"><span style="color: #0000FF">for</span></span> II <span style="font-weight: bold"><span style="color: #0000FF">in</span></span> <span style="color: #990000">**/</span><span style="color: #009900">${prefix}</span><span style="color: #990000">*;</span> <span style="font-weight: bold"><span style="color: #0000FF">do</span></span>   <span style="font-style: italic"><span style="color: #9A1900"># now will search recursively</span></span>
+<span style="font-style: italic"><span style="color: #9A1900"># !! BUT the string that gets returned is NOT the simple filename anymore, but</span></span>
+<span style="font-style: italic"><span style="color: #9A1900"># !! the relative filepath, so you have to break it apart into the</span></span>
+<span style="font-style: italic"><span style="color: #9A1900"># !! PATH and the FILENAME</span></span>
+<span style="font-style: italic"><span style="color: #9A1900"># use 'basename' and 'dirname'</span></span>
+<span style="font-style: italic"><span style="color: #9A1900"># !! WARNING:  will fail if the filename has spaces in it.</span></span>
+  echo -n <span style="color: #FF0000">"$II -&gt; "</span>
+  <span style="color: #009900">fpath</span><span style="color: #990000">=</span>`dirname <span style="color: #009900">$II</span>` <span style="font-style: italic"><span style="color: #9A1900"># the file</span></span>
+  <span style="color: #009900">fn</span><span style="color: #990000">=</span>`basename <span style="color: #009900">$II</span>`
+  <span style="color: #009900">choppedfn</span><span style="color: #990000">=</span><span style="color: #009900">${fn:${lenprefix}}</span><span style="color: #990000">;</span> <span style="font-style: italic"><span style="color: #9A1900"># uses the character offset reference</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900"># now glue the path and the chopped filename back together again</span></span>
+  <span style="color: #009900">fpn</span><span style="color: #990000">=</span><span style="color: #009900">${fpath}/${choppedfn}</span>
+  echo <span style="color: #FF0000">"$fpn"</span><span style="color: #990000">;</span>
+  <span style="font-style: italic"><span style="color: #9A1900"># mv $II $fpn;  # this does the actual renaming.</span></span>
+                      <span style="font-style: italic"><span style="color: #9A1900"># uncomment when you're sure it works correctly</span></span>
+<span style="font-weight: bold"><span style="color: #0000FF">done</span></span></tt></pre></div></div>
+<div class="ulist"><ul>
+<li>
+<p>
+rename all files ending in ‘.bam_MT.bam.bai’ , to ‘*.bai’.
+</p>
+</li>
+</ul></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-style: italic"><span style="color: #9A1900"># same thing but counts backwards thru the filename string</span></span>
+<span style="color: #009900">suffix</span><span style="color: #990000">=</span><span style="color: #FF0000">"bam_MT.bam.bai"</span>
+<span style="color: #009900">newsuff</span><span style="color: #990000">=</span><span style="color: #FF0000">"bai"</span>
+<span style="color: #009900">lensuff</span><span style="color: #990000">=</span><span style="color: #009900">${#suffix}</span>                <span style="font-style: italic"><span style="color: #9A1900"># note the format</span></span>
+<span style="font-weight: bold"><span style="color: #0000FF">for</span></span> II <span style="font-weight: bold"><span style="color: #0000FF">in</span></span> <span style="color: #990000">*</span><span style="color: #009900">${suffix}</span><span style="color: #990000">;</span> <span style="font-weight: bold"><span style="color: #0000FF">do</span></span>
+  echo -n <span style="color: #FF0000">"$II -&gt; "</span><span style="color: #990000">;</span>
+  <span style="color: #009900">len</span><span style="color: #990000">=</span><span style="color: #009900">${#II}</span><span style="color: #990000">;</span>
+  <span style="font-weight: bold"><span style="color: #0000FF">let</span></span> <span style="color: #009900">lenfilename</span><span style="color: #990000">=</span><span style="color: #FF0000">"$len - $lensuff"</span>  <span style="font-style: italic"><span style="color: #9A1900"># actual arithmetic in bash</span></span>
+  <span style="color: #009900">chopped</span><span style="color: #990000">=</span><span style="color: #009900">${II:0:$lenfilename}</span><span style="color: #990000">;</span> <span style="font-style: italic"><span style="color: #9A1900"># uses the character offset reference</span></span>
+  <span style="color: #009900">newfilename</span><span style="color: #990000">=</span><span style="color: #FF0000">"${chopped}${newsuff}"</span>
+  echo <span style="color: #009900">$newfilename</span>
+  <span style="font-style: italic"><span style="color: #9A1900"># mv $II $newfilename;  # this does the renaming. uncomment when you're</span></span>
+                          <span style="font-style: italic"><span style="color: #9A1900"># sure it works correctly</span></span>
+<span style="font-weight: bold"><span style="color: #0000FF">done</span></span></tt></pre></div></div>
+</div>
+<div class="sect3">
+<h4 id="_numfmt">2.8.4. numfmt</h4>
+<div class="paragraph"><p>numfmt can process multiple fields with field range specifications similar to
+cut, and supports setting the output precision with the --format option</p></div>
+<div class="paragraph"><p>See the <a href="http://goo.gl/j7Vfqw">StackExchange post</a></p></div>
+</div>
+<div class="sect3">
+<h4 id="_bash_printf_idiocy">2.8.5. bash printf idiocy</h4>
+<div class="paragraph"><p>#!/bin/bash</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>cat /etc/passwd | grep data | awk -F: {'print $1"@uci.edu", $1, $5'} |
+while read EMAIL USER FULLNAME ; do
+printf "$USER%6s\t$FULLNAME\n"
+done
+
+
+Output:
+emecaalv       Esteban Meca Alvarez
+valdesp       Phoebe H. Valdes
+xiaoxias       Xiaoxia Shi
+tcwong1       Timothy Chong Ji Wong</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_find_identical_lines_in_a_file">2.8.6. Find identical lines in a file</h4>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>fgrep -x -f file1 file2
+
+# ie:
+
+$ fgrep -x -f ManifestDF1.md5sums.sort 03Feb2013.OK.md5sums.sort
+09C100248.bam   fe1fa429b9a3249648dda22acfc5231c
+10C107613.bam   0643e8c112e8ad6d710114f4882a8d9e
+MH0128100.bam   56b7d19d2b4ad0badfd15081b4e55674
+MH0131639.bam   54c3c71368720bbcbe8361daf369c6f6
+
+# perfect!</pre>
+</div></div>
+<div class="paragraph"><p>or <em>comm</em></p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>comm [-1] [-2] [-3 ] file1 file2
+-1 Suppress the output column of lines unique to file1.
+-2 Suppress the output column of lines unique to file2.
+-3 Suppress the output column of lines duplicated in file1 and file2.
+
+# ie
+
+$ comm -1 -2 ManifestDF1.md5sums.sort 03Feb2013.OK.md5sums.sort
+09C100248.bam   fe1fa429b9a3249648dda22acfc5231c
+10C107613.bam   0643e8c112e8ad6d710114f4882a8d9e
+MH0128100.bam   56b7d19d2b4ad0badfd15081b4e55674
+MH0131639.bam   54c3c71368720bbcbe8361daf369c6f6</pre>
+</div></div>
+<div class="paragraph"><p><em>join</em> does a similar thing but adds the fields together and doesn&#8217;t check identicality
+<em>scut</em> can do this as well but takes a little more futzing.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_display_all_the_terminal_colors_in_a_screen">2.8.7. Display all the terminal colors in a screen</h4>
+<div class="paragraph"><p>For example if you want to get snazzy with shell or programmatic prompts..</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>for i in $(seq 0 10 256); do for j in $(seq 0 1 9); do n=$(expr $i + $j); \
+[ $n -gt 256 ] &amp;&amp; break || echo -ne "\t\033[38;5;${n}m${n}\033[0m"; done; echo; done</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_how_to_grep_for_or_8217_ed_terms">2.8.8. How to grep for OR&#8217;ed terms</h4>
+<div class="paragraph"><p>How many instances of <em>this</em> or <em>that</em> (case insensitive) are in this whole directory
+tree?</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>grep -rin  "this\|that" * |wc</pre>
+</div></div>
+<div class="paragraph"><p>How to filter terms in a grep search via OR</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre># following filters out lines that contain 'DROPPED' or 'ntpd' or 'dhcpd'
+grep -v 'DROPPED\|ntpd\|dhcpd' /var/log/syslog |less
+# or
+egrep "relative error|tstep, maxcr=        4000" somefile</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_how_to_query_for_word_globs_or_regexes_in_sqlite">2.8.9. How to query for word globs or regexes in SQLite</h4>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>sqlite&gt; select * from pcinfo where hostname like "bong%";
+2|2|128.200.34.111|bongo.nac.uci.edu|4|1|1|0
+45|16|128.200.84.8|bongo.nacs.uci.edu|4|1|1|0
+
+sqlite&gt;  select * from owner  where userid like "ps%";
+29|Pegah|Sattari|psattari@uci.edu|0|psattari@uci.edu|uciuser@uci.edu|(949)
+231-9908|backupaccount|2009-01-20</pre>
+</div></div>
+<div class="paragraph"><p>and delete them:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>sqlite&gt; delete from pcinfo where hostname like "bong%";
+
+sqlite&gt; delete from owner where userid like "ps%";</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_change_the_root_password_on_a_mysql_v5_server">2.8.10. Change the root password on a MYSQL (V5) server</h4>
+<div class="paragraph"><p>This is sort of grunty, but it has always worked, unlike many of the
+previous methods listed on the <a href="http://dev.mysql.com/doc/refman/5.0/en/resetting-permissions.html">appro MySQL page</a></p></div>
+<div class="paragraph"><p>Alternatively, on any platform, you can set the new password using the mysql
+client(but this approach is less secure):
+ Stop mysqld and restart it with the <strong>--skip-grant-tables</strong> --user=root* options
+(Windows users omit the --user=root portion).
+Connect to the mysqld server with this command:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre> shell&gt; mysql -u root</pre>
+</div></div>
+<div class="paragraph"><p>Issue the following statements in the mysql client:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre> mysql&gt; UPDATE mysql.user SET Password=PASSWORD('newpwd')
+    -&gt;                   WHERE User='root';
+ mysql&gt; FLUSH PRIVILEGES;</pre>
+</div></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>Replace *newpwd* with the actual root password that you want to use.
+You should be able to connect using the new password.</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_differences_between_etc_bashrc_etc_profile_bashrc_profile_etc">2.8.11. Differences between /etc/bashrc, /etc/profile, .bashrc, .profile, etc:</h4>
+<div class="paragraph"><p><a href="http://www.linuxquestions.org/questions/linux-general-1/etcprofile-v.s.-etcbashrc-273992/">Look here</a></p></div>
+</div>
+<div class="sect3">
+<h4 id="_correct_sort_behavior_requires_setting_locale">2.8.12. correct sort behavior requires setting locale</h4>
+<div class="paragraph"><p>Otherwise it can be all wonky.  ALWAYS set this in your .bashrc</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>export LC_ALL=C</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_background_jobs_inside_a_bash_loop">2.8.13. Background jobs inside a bash loop</h4>
+<div class="paragraph"><p>Have to place the background job inside braces or parens, like this:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>for f in *z; do { echo "copying $f"; cp $f /gl/hmangala/tdlong &amp; } ; done
+
+for ITER in $(echo {a..z}); do (cp -a ${ITER}* /gl/hmangala/ &amp; ) done</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_capture_timing_to_a_file">2.8.14. Capture timing to a file</h4>
+<div class="paragraph"><p>Use the /usr/bin/time command and use the -a -o flags:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>/usr/bin/time -p -a -o lstime ls -lR nacs &gt; lsout</pre>
+</div></div>
+<div class="paragraph"><p>The above appends the timing info into <em>lstime</em> while capturing the output
+of the <em>ls -lR</em> command into <em>lsout</em>.  If appending (-a) don&#8217;t forget to
+echo a newline into the file between interations.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_timing_background_jobs">2.8.15. Timing background jobs</h4>
+<div class="paragraph"><p>the trick is to put the background commands in a file and end the file with <em>wait</em> which will wait until all the child background jobs spawned in that process end.</p></div>
+<div class="paragraph"><p>The example below starts 10 background jobs writing to a filesystem as part of a benchmark.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>#!/bin/bash
+ROOT=/lsi;
+H=`hostname`;
+SPATH=${ROOT}/hmangala/${H}
+mkdir -p ${SPATH};
+    echo -n "$H : Loadavg: "
+    cat /proc/loadavg;
+for II in $(seq 1 10); do
+    dd if=/dev/zero of=${SPATH}/out${II} bs=1M count=2K &amp;
+done
+sync
+wait</pre>
+</div></div>
+<div class="paragraph"><p>The shell script above is called with clusterfork:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>cf --tar=c3up 'time  /data/hpc/bin/multi-dd.sh'</pre>
+</div></div>
+<div class="paragraph"><p>which spawns the jobs on the 'c3up group (9 nodes) so that all 9 are writing 10 streams of data to the filesystem which is a decent load for the filesystem.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_fix_problems_with_nxclient">2.8.16. Fix problems with nxclient</h4>
+<div class="paragraph"><p>With completely FUBAR connections:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>sudo killall -u nx # should kill all nx-related processes
+# then (for neatx sessions)
+cd  /var/lib/neatx/sessions
+rm -rf *  # or all dirs that seem to be hung</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_primitive_crontab_system_loadchecker">2.8.17. primitive crontab system loadchecker</h4>
+<div class="paragraph"><p>crontab -l:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>*/5  *  *   *   *    /home/hmangala/bin/loadchecker.pl</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_set_and_loop_thru_an_array_with_bash">2.8.18. Set and loop thru an array with bash</h4>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>#!/bin/bash
+IP_ARRAY=("106.51.107.164" "109.161.229.120" "117.18.231.29" "121.243.33.212")
+# note the array spec above and the reference format below.  If the elements
+# were integers or even floats(?), wouldn't need the "" (I think).
+
+for i in ${IP_ARRAY[@]}; do
+        echo "$i = "
+        nslookup ${i} | grep "name ="| scut -f 1 -d '=' | uniq
+    echo "==============="
+done</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_iterate_thru_lists_in_bash">2.8.19. Iterate thru lists in bash</h4>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>list='a64-112 a64-120 a64-129 a64-178 claw2 claw3 claw4 n121'
+for hj in $list; do
+  echo $hj
+done
+
+# also the famous ITER:
+for ITER in $(seq -f "%03g" 1 140); do echo A64HOST=a64-${ITER}; done
+for ITER in $(echo {p..q}); do time rsync -a $ITER*  /h; done
+
+# to nest padded and unpadded ITERs:
+for UNPAD in $(seq 1 10) ; do
+  PAD=$(printf  "%03g" "$UNPAD")
+  echo "A64HOST${UNPAD}=a64-${PAD}"
+done</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_disappear_the_grotacious_error_messages_from_kde_java_etc">2.8.20. Disappear the grotacious error messages from KDE, java, etc</h4>
+<div class="paragraph"><p>To make the streaming error messages from konqueror, java, etc go to
+/dev/null, append the following to the application call:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>$ application &gt;&amp; /dev/null &amp;
+#             ^^^^^^^^^^^^^</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_using_find_to_identify_old_files">2.8.21. Using find to identify old files</h4>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>find /path/to/start -maxdepth 5 -mtime +183</pre>
+</div></div>
+<div class="paragraph"><p>where -maxdepth 5 is the levels of dirs to query and -mtime +183 is the
+filter to pass if you&#8217;re searching fo rfiles older than 183 days (~ half a
+yr.)  If you want files YOUNGER than that, use <em>-183</em>.  Useful for creating
+a stream of file names to include or exclude.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_more_em_find_em_examples">2.8.22. More <em>find</em> examples</h4>
+<div class="paragraph"><p>See <a href="http://www.linux.com/learn/tutorials/316404-10-tips-for-using-gnu-find">this page</a> for good examples.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_how_to_recursively_rename_files">2.8.23. How to recursively rename files</h4>
+<div class="listingblock">
+<div class="content monospaced">
+<pre># this substitutes a '_' for all spaces in file names.
+# if you don't add the trailing 'g' in the regex, only
+# the 1st space gets replaced.
+
+find . -name  *\ * -print0 | rename  's/\ /_/g'</pre>
+</div></div>
+<div class="paragraph"><p>The <em>-print0</em> option to find maintains spaces and most other internal
+unusual characters (but not parens ()).  To have <strong>rename</strong> NOT do the rename
+but only show you what will happen (always a good idea), use the <em>-n</em> flag</p></div>
+<div class="paragraph"><p>NB: Also see the Linux-Mag series <strong>Filenames by design</strong>.</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<a href="http://www.linux-mag.com/id/7251">Part 1</a>
+</p>
+</li>
+<li>
+<p>
+<a href="http://www.linux-mag.com/id/7171">Part 2</a>
+</p>
+</li>
+<li>
+<p>
+<a href="http://www.linux-mag.com/id/7194">Part 3</a>
+</p>
+</li>
+</ul></div>
+</div>
+<div class="sect3">
+<h4 id="_complex_rules_with_strong_find_strong">2.8.24. complex rules with <strong>find</strong></h4>
+<div class="paragraph"><p><em>find</em> is a great utility, but it&#8217;s an effing brute to figure out how to
+do complex searches.  Here&#8217;s an example of how to use it to search for:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+zero sized files (any name, any age)
+</p>
+</li>
+<li>
+<p>
+file that have the suffix <em>.fast[aq]</em>, .<em>f[aq]</em>, <em>.txt</em>, <em>.sam</em>, <em>pileup</em>, <em>.vcf</em>
+</p>
+</li>
+<li>
+<p>
+but only if those named files are older than 90 days (using a bash variable to
+pass in the <em>90</em>)
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>The <em>-o</em> acts as the <em>OR</em> logic and the <em>-a</em> acts as the <em>AND</em> logic.
+Note how the parens and brackets have to be escaped.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>DAYSOLD=90
+find .  -size 0c \
+        -o \( \
+        \( -name \*.fast\[aq\] \
+        -o -name \*.f\[aq\]  \
+        -o -name \*.txt  \
+        -o -name \*.sam  \
+        -o -name \*pileup \
+        -o -name \*.vcf \) \
+        -a -mtime +${DAYSOLD} \
+        -a -maxdepth 6 \
+        -a -type d\)
+
+find .  -maxdepth 6 \
+   -a -size 0c \
+   -o  \( \( -name \*.fast\[aq\] \
+   -o -name \*.f\[aq\]  \
+   -o -name \*.txt  \
+   -o -name \*.sam  \
+   -o -name \*pileup \
+   -o -name \*.vcf \) \
+   -a -mtime +${DAYSOLD} \
+   -a -type d \)
+
+# find all files larger than 100MB
+find . -type f -size +100M</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_how_to_use_em_screen_em">2.8.25. How to use <em>screen</em></h4>
+<div class="paragraph"><p><a href="http://aperiodic.net/screen/quick_reference">Good cheat sheet here</a></p></div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_screen_commands">2.9. Screen commands</h3>
+<div class="ulist"><ul>
+<li>
+<p>
+<em>screen</em> - start the screen session
+</p>
+</li>
+<li>
+<p>
+C-a n - create a new screen
+</p>
+</li>
+<li>
+<p>
+C-a A - name the session
+</p>
+</li>
+<li>
+<p>
+C-a n - next screen
+</p>
+</li>
+<li>
+<p>
+C-a p - Previous screen
+</p>
+</li>
+<li>
+<p>
+C-a R - re-connect to a lost session  (multi-attach by adding an -x )
+</p>
+</li>
+<li>
+<p>
+C-a " - list all screen sessions
+</p>
+</li>
+<li>
+<p>
+C-a _ - monitor for silence
+</p>
+</li>
+<li>
+<p>
+C-a M - monitor for output
+</p>
+</li>
+<li>
+<p>
+C-a D - detach from session
+</p>
+</li>
+<li>
+<p>
+C-a [ - start copy text
+  (cursor to where you want to start, hit spacebar
+  move to the end of the copy section and hit spacebar again to finish the
+  copy
+</p>
+</li>
+<li>
+<p>
+C-a ] - pastes whatever&#8217;s in the buffer.
+</p>
+</li>
+</ul></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_sge_tips_and_tricks">3. SGE tips and tricks</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_qstat_status_characters">3.1. qstat status characters</h3>
+<div class="paragraph"><p>See <a href="https://hpc.oit.uci.edu/HPC_USER_HOWTO.html#_sge_qstat_state_codes">SGE status codes</a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_remove_sge_users">3.2. Remove SGE users</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre># removes USER as well as removes the USER from any SGE groups in
+#
+qconf -duser USER
+qconf -du USER listname</pre>
+</div></div>
+<div class="paragraph"><p>Change all Q instances at once</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>*man qmod*
+---------------------------------------------------------
+# change all Q instances running on compute-3-1 back to enabled.
+$ qmod -e *@compute-3-1
+Queue instance "asom@compute-3-1.local" is already in the specified state: enabled
+Queue instance "free64@compute-3-1.local" is already in the specified state: enabled
+Queue instance "ctnl@compute-3-1.local" is already in the specified state: enabled
+---------------------------------------------------------
+
+*Disable all Qs on a node*
+---------------------------------------------------------
+$ qmod -d *@compute-3-9
+root@hpc-s.local changed state of "free64@compute-3-9.local" (disabled)
+root@hpc-s.local changed state of "asom@compute-3-9.local" (disabled)
+root@hpc-s.local changed state of "som@compute-3-9.local" (disabled)
+---------------------------------------------------------
+
+
+
+Fix qmon font errors</pre>
+</div></div>
+<div class="paragraph"><p><a href="http://hpcprogrammer.com/fix-qmon-and-those-annoying-font-errors">See here</a></p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre># on Mint/Debian/Ubuntu
+sagi xfonts-100dpi xfonts-100dpi-transcoded xfonts-75dpi xfonts-75dpi-transcoded
+xset +fp  /usr/share/fonts/X11/100dpi/
+xset +fp  /usr/share/fonts/X11/75dpi/
+xset fp rehash
+# ! ta daaaaaa!
+
+# or if that doesn't work, this has worked recently:
+
+cd /usr/share/fonts/X11/100dpi/
+sudo mkfontdir
+xset fp+ /usr/share/fonts/X11/100dpi
+# add the path permanently..
+echo "FontPath /usr/share/fonts/X11/100dpi" &gt;&gt; ~/.xinitrc</pre>
+</div></div>
+</div>
+<div class="sect2">
+<h3 id="_generate_a_list_of_user_sge_jobs_to_feed_to_qdel">3.3. Generate a list of user SGE jobs to feed to qdel</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>$ kill_list=`qstat -u [user] |cut -f1 -d' ' |grep -v '\-' |  tr '\n' ' '`
+1450169 1450166 1455492 1455493 1455494 1455495 1455496 1455497 1455498
+1455499 1455500 1455501 1455502 1455503 1455504 1455506 1455507 1455508
+1455509 1455511 1455512 1455513 1455514 1455515 1455516 1455518 1455519
+1455520 1455521 1455522 1455523 1455524 1455525 1455527 1455528 1455529
+1455530 1455531 1455533 1455534 1455535 1455536 1455538 1455539 1455540
+1455541 1455542 1455543
+
+# and then, finish them off with:
+$ qdel $kill_list</pre>
+</div></div>
+</div>
+<div class="sect2">
+<h3 id="_sge_commandline_docs_from_oracle">3.4. SGE Commandline docs from Oracle</h3>
+<div class="paragraph"><p><a href="http://docs.oracle.com/cd/E24901_01/doc.62/e21978/management.htm">Right here</a></p></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_programming">4. Programming</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_set_cmake_installation_dir">4.1. Set cmake installation dir</h3>
+<div class="paragraph"><p>See <a href="https://goo.gl/5QbG1Q">this StackOverflow thread</a>.</p></div>
+<div class="paragraph"><p>Short version is:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr</pre>
+</div></div>
+</div>
+<div class="sect2">
+<h3 id="_matlab_howtos">4.2. MATLAB HOWTOs</h3>
+<div class="sect3">
+<h4 id="_check_matlab_license_status">4.2.1. Check MATLAB license status</h4>
+<div class="paragraph"><p>To check the usage status of the campus license pool:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>module load MATLAB # load the MATLAB module; sets up the env vars
+
+$MATLAB/bin/glnxa64/lmutil lmstat -a -c 1711@seshat.nacs.uci.edu
+#                                      (port@license-server)
+
+# Please include the above line in your qsub scripts if you're using
+# MATLAB to make sure the license server is online.
+
+# you can check more specifically by then grepping thru the output.
+# For example to find the status of the Distributed Computing Toolbox licenses:
+
+$MATLAB/bin/glnxa64/lmutil lmstat -a -c 1711@seshat.nacs.uci.edu | grep Distrib_Computing_Toolbox</pre>
+</div></div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_c_howtos">4.3. C HOWTOs</h3>
+<div class="sect3">
+<h4 id="_convert_a_static_lib_into_a_shared_one">4.3.1. Convert a static lib into a shared one</h4>
+<div class="paragraph"><p>You can convert the static version of of library into a dynamic version by doing the following:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>ar -x libsomename.a
+gcc -shared -fpic -o libsomename.so *.o</pre>
+</div></div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_r_howtos">4.4. R HOWTOS</h3>
+<div class="paragraph"><p>Replaced with
+<a href="http://moo.nac.uci.edu/~hjm/AnRCheatsheet.html">entire posting about R and BioConductor</a>.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_update_all_existing_r_packages">4.5. Update all existing R packages</h3>
+<div class="paragraph"><p>The following will traverse ALL existing R packages and update them if they need it.
+Requires the full development set.  Depending on your set of installed packages, this
+may be a very long (overnight) process.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>&gt; update.packages(ask = FALSE, dependencies = c('Suggests'))</pre>
+</div></div>
+</div>
+<div class="sect2">
+<h3 id="_re_install_all_previous_packages_in_latest_version_of_r">4.6. Re-install all previous packages in latest version of R</h3>
+<div class="paragraph"><p>see <a href="http://stackoverflow.com/questions/2169118/installing-all-cran-packages-that-are-not-already-installed">this stackoverflow question</a>.</p></div>
+<div class="paragraph"><p>Essentially..</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+in the old version of R&#8230;
+</p>
+</li>
+<li>
+<p>
+obtain the names of all previous packages
+</p>
+</li>
+<li>
+<p>
+save them into a variables
+</p>
+</li>
+<li>
+<p>
+quit the old version of R, saving your workspace
+</p>
+</li>
+<li>
+<p>
+start new version of R, restoring variables
+</p>
+</li>
+<li>
+<p>
+use <em>install.packages()</em> to install all the ones that were in the old one.
+</p>
+</li>
+<li>
+<p>
+easy peasy
+</p>
+</li>
+</ul></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre># start old version of R; get names of installed packages
+packs &lt;- installed.packages()
+exc &lt;- names(packs[,'Package'])
+
+# now quit old version of R, saving workspace
+
+# now 'module load R/newversion'
+# R      # starts new R, reads workspace
+ls() # verify that you have the list of packages to install
+install.packages(exc,dependencies=TRUE)  # this will take a VERY long time to run; do it overnight..</pre>
+</div></div>
+<div class="sect3">
+<h4 id="_r_cmd_install_mods">4.6.1. "R CMD INSTALL" mods</h4>
+<div class="paragraph"><p>Here&#8217;s the example for <em>Rmpi</em>.  Note the format for passing in the configure
+options.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>R CMD INSTALL --configure-vars='LIBS=-L/apps/openmpi/1.4.2/lib' \
+--configure-args="--with-Rmpi-type=OPENMPI \
+--with-Rmpi-libpath=/apps/openmpi/1.4.2/lib \
+--with-mpi=/apps/openmpi/1.4.2 \
+--with-Rmpi-include=/apps/openmpi/1.4.2/include" \
+Rmpi_0.5-9.tar.gz</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_installing_packages_from_within_r">4.6.2. Installing packages from within R</h4>
+<div class="paragraph"><p>The following will download, compile and install (with all the dependencies)
+any existing R package (and point to a http (vs https) repo as well.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre># as root if installing for whole platform
+$ R
+...
+
+# NOTE: it's "configure-vars" in the 'outside-R' commandline above, but "configure.vars" in the 'inside R' version
+&gt; install.packages("&lt;R package name&gt;", dependencies = TRUE, repos="http://cran.cnr.Berkeley.edu",
+configure.vars='LIBS=-L/apps/openmpi/1.4.2/lib')
+# eg:
+install.packages("ggplot2", dependencies=TRUE)
+install.packages("BiodiversityR", dependencies=TRUE)</pre>
+</div></div>
+<div class="paragraph"><p><a href="https://stat.ethz.ch/R-manual/R-devel/library/utils/html/install.packages.html">Also
+see the docs</a></p></div>
+<div class="paragraph"><p>BioConductor can be installed like:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>&gt; source("http://bioconductor.org/biocLite.R")
+ ...
+&gt; biocLite()
+# more at http://www.bioconductor.org/install/</pre>
+</div></div>
+<div class="paragraph"><p>and install individual BioC packages, use:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre># to install both "GenomicFeatures" and "AnnotationDbi"
+&gt;BiocManager::install(c("GenomicFeatures", "AnnotationDbi"))</pre>
+</div></div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_perl_howtos">4.7. Perl HOWTOs</h3>
+<div class="sect3">
+<h4 id="_cpanm">4.7.1. cpanm</h4>
+<div class="paragraph"><p>A much easier way to install perl modules&#8230;</p></div>
+<div class="paragraph"><p>BUT:  make sure you set</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>export PERL_MM_OPT=""</pre>
+</div></div>
+<div class="paragraph"><p>Otherwise <em>cpanm</em> will install the new modules wherever <em>PERL_MM_OPT</em> is set to (and it will probably not be in the
+<strong>\@INC</strong> path, so other perl modules can&#8217;t find it. Sheesh.  Wasted an hour on this..</p></div>
+</div>
+<div class="sect3">
+<h4 id="_install_a_bunch_of_modules_at_once">4.7.2. Install a bunch of modules at once:</h4>
+<div class="paragraph"><p>Generate s list of module names, <em>test.modules</em> below and feed thru xargs and then into cpan.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>./test.modules |grep fail|cut -f2 -d" "|xargs -I {} cpan {}</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_debug_a_regex_using_only_perl">4.7.3. Debug a regex using only Perl</h4>
+<div class="paragraph"><p>Use Perl&#8217;s built-in debugger.  ie:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>perl -Mre=debug -e'"gagctagggcatgtagc"=~/g{0,3}c[at]{2}g[at]./'
+# paste into a shell to see what it gives you.</pre>
+</div></div>
+<div class="paragraph"><p>Or use a <a href="http://gskinner.com/RegExr/">web-based debugger</a></p></div>
+</div>
+<div class="sect3">
+<h4 id="_how_to_quickly_find_descriptions_of_perl_functions">4.7.4. How to quickly find descriptions of perl functions</h4>
+<div class="paragraph"><p>Instead of googling about trying to find the right one or paging thru the 10K lines of <strong>man perlfunc</strong>, you can jump right to the right one with:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>perldoc -f [the function]</pre>
+</div></div>
+<div class="paragraph"><p>Usefully, this also works with the file tests:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>perldoc -f '-e'</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_how_to_extend_perl_8217_s_inc_lib_path">4.7.5. How to extend Perl&#8217;s @INC lib path</h4>
+<div class="paragraph"><p><a href="http://www.perlhowto.com/extending_the_library_path">http://www.perlhowto.com/extending_the_library_path</a></p></div>
+</div>
+<div class="sect3">
+<h4 id="_using_sqlite_from_perl">4.7.6. Using SQLite from Perl</h4>
+<div class="paragraph"><p>See <a href="http://tinyurl.com/6yckw8">the CaRtalk forums entry</a> or look at the <a href="http://moo.nac.uci.edu/~hjm/recursive.filestats.sqlite_skel.pl">example Perl Script</a>.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_simple_line_by_line_processing_in_perl">4.7.7. Simple line-by-line processing in Perl</h4>
+<div class="listingblock">
+<div class="content monospaced">
+<pre># from STDIN
+while (&lt;&gt;) {
+        [insert processing here]
+}</pre>
+</div></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre># from a file, similar syntax, but with the file handle
+open (FH, "&lt;$filename") or die "Can't open the file";
+while (&lt;FH&gt;) {
+        [insert processing here]
+}</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_perl_8217_s_em_select_em">4.7.8. Perl&#8217;s <em>select()</em></h4>
+<div class="paragraph"><p>If you need to send output to different files or streams, define them all
+beforehand and then use select() to select among them. ie:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>#!/usr/bin/perl -w
+open LOG, "&gt;&gt;test.log";
+print "This should go to STDOUT (the console)\n";
+select (LOG);
+print "Now this should go to the log\n";
+print "Now this should append to the log\n";
+select (STDOUT);
+print "This should now go to STDOUT (back to the console)\n";</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_the_perl_one_liner_replace">4.7.9. The Perl one-liner replace</h4>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>perl -e 's/replacethis/withthis/gi' -p -i.bak [in these files]</pre>
+</div></div>
+<div class="paragraph"><p>You can also use other delimiters if the patterns strings contain slashes:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>perl -e 's%/this/path/to/file%/with/this/path/to/file%gi' -p -i.bak [in these files]</pre>
+</div></div>
+<div class="paragraph"><p>or to be anal about it:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>find . -name '*.html' -print0 | xargs -0 perl -pi -e \
+'s/oldstring/newstring/g'</pre>
+</div></div>
+<div class="paragraph"><p>the <em>find -print0</em> prevents filenemes with spaces from screwing
+things up as long as you use the matching <em>-0</em> in the xargs cmd.</p></div>
+<div class="paragraph"><p><strong>Garr adds:</strong></p></div>
+<div class="paragraph"><p>The example below is useful because we have to do the "#!/usr/bin/perl"
+first-line replacement so often:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>perl -e 's{^\#\!/usr/bin/perl( +\-W)?}{#!/usr/bin/env  perl}g' -p -i.bak *.pl</pre>
+</div></div>
+<div class="paragraph"><p>But it&#8217;s also cute for two reasons:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+It handles cases where there <em>could</em> be a "-W" after "/usr/bin/perl"
+</p>
+</li>
+<li>
+<p>
+It uses open-and-close braces "{}" as the delimiters, which I find
+easier to read than a single delimiter symbol like "%".  This trick
+works with other open-and-close characters, like braces "[]", too.
+</p>
+</li>
+</ul></div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_python_howtos">4.8. Python HOWTOs</h3>
+<div class="sect3">
+<h4 id="_force_a_recompile_of_a_pip_installed_package_from_git">4.8.1. Force a recompile of a pip-installed package from git</h4>
+<div class="paragraph"><p>Example (khmer) to reinstall from the original git distribution.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>pip install --upgrade --force-reinstall --no-binary all --no-deps git+git://github.com/dib-lab/khmer.git</pre>
+</div></div>
+<div class="paragraph"><p>Further, Edward adds:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+"--upgrade" is required for "--force-reinstall" (which is a weird design&#8230;)
+</p>
+</li>
+<li>
+<p>
+Because of #1, if you want to install a specific version, use "package_name==1.2.3" instead of "package_name"
+</p>
+</li>
+<li>
+<p>
+"--no-binary all" enforces compiling from source for specified package and all its dependencies
+</p>
+</li>
+<li>
+<p>
+"--no-deps" disables dependency tracking, which is very useful when recompiling. Without it, the mandatory "--upgrade" parameter will try reinstall / upgrade all dependencies.
+</p>
+</li>
+<li>
+<p>
+Git url is supported by pip, which is better to use if you don&#8217;t need to patch source code.
+</p>
+</li>
+<li>
+<p>
+"git+git://github.com/dib-lab/khmer.git" is how you have to format the url. If it&#8217;s a git via https url (which is recommended to use nowadays), then it would be "git+https://github.com/dib-lab/khmer.git". But obvious our enthought_python has some problem with HTTPS that it never works.
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect3">
+<h4 id="_modify_the_python_setup_py_makefile">4.8.2. Modify the Python setup.py Makefile</h4>
+<div class="paragraph"><p>This is a bastard of a thing to figure out.  The <em>setup.py</em> file defines a bunch of files that needs to be processed internally and the <em>Makefile</em> also defines a bunch of envvars that are OVERWRITTEN (not appended to) envvars that are defined in the SHELL.  So you often get conflicting or missing choices if the <em>python setup.py build</em> command fails.</p></div>
+<div class="paragraph"><p>You can modify all the envvars in one place by editing the Python-version-dependent <em>setup.py</em> Makefile which is typically found in</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>$PYTHON_ROOT/lib/pythonX.Y/config/Makefile</pre>
+</div></div>
+<div class="paragraph"><p>This contains most of the envvars that need to be modified to allow for a successful compile/install.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_simple_line_by_line_processing_in_python">4.8.3. Simple line-by-line processing in Python</h4>
+<div class="paragraph"><p>extracted from <a href="http://python.about.com/od/simplerscripts/qt/fanalysisbyline.htm">about.com</a></p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>fileIN = open(sys.argv[1], "r")
+line = fileIN.readline()
+
+while line:
+        [some bit of analysis here]
+        line = fileIN.readline()</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_execute_a_system_command_in_python">4.8.4. Execute a system command in Python</h4>
+<div class="paragraph"><p>The code will execute the command but not caputure the output.  For that see
+the next HOWTO.  You can/should embed it in a try:/except: clause to make
+sure that it worked as expected.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>import os
+
+cmd = 'ls -l /usr/bin'
+try:
+    os.system(cmd)
+except:
+    print "ERR:[%s] did not complete successfully!"</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_read_a_system_command_output_into_python_list">4.8.5. Read a system command output into Python list</h4>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>from commands import getoutput
+syscmd = "system command text"
+sysoutput = []
+sysoutput = getoutput(syscmd).split("\n")
+# sysoutput is now a list of output lines split on newlines</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_ipython_debugging_in_a_python_script">4.8.6. ipython debugging in a python script</h4>
+<div class="paragraph"><p>NB: this may no longer be the case - I think the ipython debug shell syntax may have changed recently&#8230;</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        9 import IPython
+       10 IPython.embed()
+        ...
+       45    for k in range(options.kmin, options.kmax+options.kstep, options.kstep):
+       46       IPython.embed() # &lt;----- !!! will break into an ipython shell
+       47        p = subprocess.Popen(['velvetg','%s_%i' % (options.directoryRoot, k), '-read_trkg', 'yes'],
+       48        output = p.communicate()</pre>
+</div></div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_autoconf_make_compiler_tips">4.9. Autoconf, Make, Compiler tips</h3>
+<div class="sect3">
+<h4 id="_git_hints">4.9.1. git hints</h4>
+<div class="paragraph"><p>To cleanup a git repo, you need two commands:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>git reset --hard        # this will reset all changed files
+git clean -dfx          # this will remove all untracked files</pre>
+</div></div>
+<div class="paragraph"><p>In case it has submodules, add two more commands to cleanup submodules:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>git submodule foreach git reset --hard
+git submodule foreach git clean -dfx</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_em_configure_help_em_options">4.9.2. <em>configure --help</em> options</h4>
+<div class="paragraph"><p>These are from R&#8217;s configure, among the most elaborate I&#8217;ve seen. Not all of
+these are used in all configure systems.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>Some influential environment variables:
+  R_PRINTCMD  command used to spool PostScript files to the printer
+  R_PAPERSIZE paper size for the local (PostScript) printer
+  R_BATCHSAVE set default behavior of R when ending a session
+  MAIN_CFLAGS additional CFLAGS used when compiling the main binary
+  SHLIB_CFLAGS
+              additional CFLAGS used when building shared objects
+  MAIN_FFLAGS additional FFLAGS used when compiling the main binary
+  SHLIB_FFLAGS
+              additional FFLAGS used when building shared objects
+  MAIN_LD     command used to link the main binary
+  MAIN_LDFLAGS
+              flags which are necessary for loading a main program which will
+              load shared objects (DLLs) at runtime
+  CPICFLAGS   special flags for compiling C code to be turned into a shared
+              object.
+  FPICFLAGS   special flags for compiling Fortran code to be turned into a
+              shared object.
+  FCPICFLAGS  special flags for compiling Fortran 95 code to be turned into a
+              shared object.
+  SHLIB_LD    command for linking shared objects which contain object files
+              from a C or Fortran compiler only
+  SHLIB_LDFLAGS
+              special flags used by SHLIB_LD
+  DYLIB_LD    command for linking dynamic libraries which contain object files
+              from a C or Fortran compiler only
+  DYLIB_LDFLAGS
+              special flags used for make a dynamic library
+  CXXPICFLAGS special flags for compiling C++ code to be turned into a shared
+              object
+  SHLIB_CXXLD command for linking shared objects which contain object files
+              from the C++ compiler
+  SHLIB_CXXLDFLAGS
+              special flags used by SHLIB_CXXLD
+  SHLIB_FCLD  command for linking shared objects which contain object files
+              from the Fortran 95 compiler
+  SHLIB_FCLDFLAGS
+              special flags used by SHLIB_FCLD
+  TCLTK_LIBS  flags needed for linking against the Tcl and Tk libraries
+  TCLTK_CPPFLAGS
+              flags needed for finding the tcl.h and tk.h headers
+  MAKE        make command
+  TAR         tar command
+  R_BROWSER   default browser
+  R_PDFVIEWER default PDF viewer
+  BLAS_LIBS   flags needed for linking against external BLAS libraries
+  LAPACK_LIBS flags needed for linking against external LAPACK libraries
+  LIBnn       'lib' or 'lib64' for dynamic libraries
+  SAFE_FFLAGS Safe Fortran 77 compiler flags for e.g. dlamc.f
+  r_arch      Use architecture-dependent subdirs with this name
+  DEFS        C defines for use when compiling R
+  JAVA_HOME   Path to the root of the Java environment
+  R_SHELL     shell to be used for shell scripts, including 'R'
+  YACC        The `Yet Another C Compiler' implementation to use. Defaults to
+              the first program found out of: `bison -y', `byacc', `yacc'.
+  YFLAGS      The list of arguments that will be passed by default to $YACC.
+              This script will default YFLAGS to the empty string to avoid a
+              default value of `-d' given by some make applications.
+  CC          C compiler command
+  CFLAGS      C compiler flags
+  LDFLAGS     linker flags, e.g. -L&lt;lib dir&gt; if you have libraries in a
+              nonstandard directory &lt;lib dir&gt;
+  LIBS        libraries to pass to the linker, e.g. -l&lt;library&gt;
+  CPPFLAGS    (Objective) C/C++ preprocessor flags, e.g. -I&lt;include dir&gt; if
+              you have headers in a nonstandard directory &lt;include dir&gt;
+  CPP         C preprocessor
+  F77         Fortran 77 compiler command
+  FFLAGS      Fortran 77 compiler flags
+  CXX         C++ compiler command
+  CXXFLAGS    C++ compiler flags
+  CXXCPP      C++ preprocessor
+  OBJC        Objective C compiler command
+  OBJCFLAGS   Objective C compiler flags
+  XMKMF       Path to xmkmf, Makefile generator for X Window System
+  FC          Fortran compiler command
+  FCFLAGS     Fortran compiler flags
+
+Use these variables to override the choices made by `configure' or to help
+it to find libraries and programs with nonstandard names/locations.</pre>
+</div></div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_personal_roaming_tips_and_tricks">5. Personal/Roaming tips and tricks</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_reset_sound_in_chrome_browser_when_it_garbles_in_video_playback">5.1. Reset sound in chrome browser when it garbles in video playback</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>pulseaudio --kill</pre>
+</div></div>
+<div class="paragraph"><p>That&#8217;s it.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_how_to_restore_kmail_and_google_chrome_settings_after_a_crash">5.2. How to restore kmail and google-chrome settings after a crash</h3>
+<div class="paragraph"><p>kmail keeps its setting in <em>~/.kde/share/config/kmailrc</em>.  Since kmail is almost always open, it will not have written its config back to kmailrc and the file will be quite truncated.
+If you have the foresight to make a backup of a good kmailrc, then just copy it back over the bad one.  If you didn&#8217;t make a backup, you&#8217;ll have to go in and retype all the account info.</p></div>
+<div class="paragraph"><p>You can import all the filters again from a previous file tho by using the <em>Import</em> button on the filters pane.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_reset_plama_shell">5.3. reset Plama Shell</h3>
+<div class="paragraph"><p>Includes the application panel.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>killall plasmashell
+kstart plasmashell</pre>
+</div></div>
+</div>
+<div class="sect2">
+<h3 id="_how_to_avoid_being_sniffed_at_public_wifi_hotspots">5.4. How to avoid being sniffed at public WIFI hotspots</h3>
+<div class="paragraph"><p>To set up an ssh tunnel to shield against wireless sniffing (to check
+email securely when using a public access non-WEP/WAP access point), use the -L
+flag agin, but remapping port 110:</p></div>
+<div class="paragraph"><p>ssh -L 2110:pop.west.cox.net:110 moo.nac.uci.edu</p></div>
+<div class="paragraph"><p>the above line establishes a tunneled connection via moo.nac.uci.edu to port
+110 on pop.west.cox.net using localhost port 2110 (has to be above 1024 for
+regular users to be able to use it).  But you do have to configure your mail
+client to use localhost:2110 instead of pop.west.cox.net:110 as your mail
+server.</p></div>
+<div class="paragraph"><p>Slightly inconvenient, but better than having your password sniffed.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_how_to_use_ssh_as_a_vpn_or_smtp_proxy">5.5. How to use ssh as a VPN or SMTP proxy</h3>
+<div class="sect3">
+<h4 id="_browser_vpn">5.5.1. Browser VPN</h4>
+<div class="paragraph"><p>The vpn for your browser is very simple.  In your shell, define the proxy port:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>$ ssh -D 1111 user@remote host.</pre>
+</div></div>
+<div class="paragraph"><p>then config your browser to use the proxy port you just set (localhost port 1111)</p></div>
+<div class="paragraph"><p>For Firefox (on Linux anyway), the click path is as follows:</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre> Firefox -&gt; Preferences -&gt; Advanced -&gt; Network tab -&gt; Connection [Settings]
+   change the Proxy from "Direct connection to the Internet"
+   to: Manual Proxy configuration
+and set the SOCKS host to *localhost port 1111*
+(o)SOCKS_v5 setting is checked/clicked.</pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_smtp_settings">5.5.2. SMTP settings</h4>
+<div class="paragraph"><p>To send mail thru UCI&#8217;s server when far afield, you have to tunnel/port forward to a host that will then forward to the usual smtp host.</p></div>
+<div class="paragraph"><p>for example, to use uci&#8217;s smtp server while away,  first ssh to &lt;yourUCIhost&gt; with the following command:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>ssh -L 2025:smtp.uci.edu:25 &lt;yourUCIhost&gt;.uci.edu</pre>
+</div></div>
+<div class="paragraph"><p>this port-forwards localhost&#8217;s port 2025 to port 25 on smtp.uci.edu via a ssh to
+&lt;yourUCIhost&gt;.uci.edu, which is on the uci net.</p></div>
+<div class="paragraph"><p>In this case I also have to configure kmail to send a null hostname to uci and also to check what the server supports for authentication protocol.</p></div>
+<div class="paragraph"><p>This should also work for bonk to use the cox smtp server, tho the kmail
+specifics may vary.  This should NOT require any setup of an smtp server on
+bonk or sand or anything else. ie:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>ssh -L 2025:smtp.west.cox.net:25 ibonk</pre>
+</div></div>
+<div class="paragraph"><p>-L [bind_address:]port:host:hostport</p></div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_misc">6. Misc</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_how_to_put_a_bluetooth_plantronics_510_into_pairing_mode">6.1. How to put a Bluetooth Plantronics 510 into pairing mode</h3>
+<div class="paragraph"><p>Press call button and Volume UP at the same time until LED starts to blink
+blue and red.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_reboot_em_dabrick_em_after_an_grub_error">6.2. Reboot <em>dabrick</em> after an grub error</h3>
+<div class="paragraph"><p>Error 5: Partition table invalid or corrupt.</p></div>
+<div class="paragraph"><p>The problem stems not from a bad disk but from the different ways that the
+BIOS, Grub, and the OS interact.  Now that disk interfaces include IDE,
+SATA, SCSI, USB, Firewire, etc, it&#8217;s harder for the OS to decide what to use
+as a boot disk.  Grub tries to make a good guess at what this should be, but
+often fails, especially after a major upgrade that may overwrite custom
+mapping files.  This is what happened in the most recent reboot failure.
+grub allows you to fix this on the fly by allowing you to temporarily edit
+the boot parameters and booting on those (ephemeral - doesn&#8217;t get written to
+disk) settings.  If you don&#8217;t edit the files once you&#8217;ve booted up, when you
+reboot, the old bad ones are re-read from disk and you&#8217;ll get the same
+errors again.  Condemned to repeat the past, etc.</p></div>
+<div class="paragraph"><p>The way to temporarily get booting again is:
+ * halt the boot process in the grub menu.
+ * hilite the appropriate line and press <em>e</em> to edit it.  This will show a screen of several lines, each one of which can be edited by cursoring to it and pressing <em>e</em> again.
+ * correct the mistake (usually by changing the disk ID to the right one:
+   root   (hd2,0)
+     should be
+   root   (hd0,0)
+     and hit &lt;Enter&gt;, NOT &lt;Esc&gt;
+* now you&#8217;re back at the 1st screen and you can boot this entry by hitting <em>b</em>
+* this will <strong>NOT</strong> write the corrected entry to the disk, so when the system has booted, edit  <strong>/boot/grub/menu.lst</strong> and correct the entry in there as well.</p></div>
+<div class="paragraph"><p>After Upgrade remember to test:
+ * mail/mutt
+ * apache - after reboot and remount big partitions
+ * trac/svn - after reboot and remount big partitions
+ * mounting big partitions and map to /boot/grub/device.map
+ * NFS exports, but have to re-read the NFS mounts from BDUC
+ * replace the /etc/X11/xorg.conf file with the working one from backup.
+       X1 works but is at default rez.
+ * java (install Java 6)
+ * can we change fstab to mount the sda/sdb correctly? Can try using <em>blkid</em> to generate the UUIDs for fstab.
+ * check /boot/grub/menu.lst again - changed during install again. Yes, with the current
+     settings it boots as it&#8217;s supposed to:</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre> hjm@dabrick:~
+502 $ cat /boot/grub/device.map
+(hd0)   /dev/sdc
+(hd1)   /dev/sda
+(hd2)   /dev/sdb</pre>
+</div></div>
+<div class="paragraph"><p>dmesg finds 3ware 1st (also in BIOS scan) and would guess that 3ware &#8594; sda and Areca is sdb</p></div>
+<div class="paragraph"><p>!! THIS IS CORRECT
+Yes.  3ware / sda &#8594; /data when we reboot successfully!!
+      areca / sdb &#8594; /bduc
+      boot    sdc &#8594; /, /home</p></div>
+<div class="paragraph"><p>test after mounts.  /data has the BackupPC dir
+                    /bduc has apps, Modules dirs</p></div>
+</div>
+<div class="sect2">
+<h3 id="_clean_the_nozzles_of_a_hp_5850_inkjet">6.3. Clean the nozzles of a HP 5850 inkjet</h3>
+<div class="paragraph"><p>VERY simple (when it works).  Refill the cartridge to just LESS than
+overflowing (if you fill it full, it will leak).  Replace, then run:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>$ hp-clean</pre>
+</div></div>
+<div class="paragraph"><p>This will probe the local network to find an HP printer, then initiate the
+cleaning routine. It primes the cartridge very well, avoiding the need to
+run 20 pages of paper thru it.  Obviously, if you have multiple inkjets on
+that network, you should specify which one.</p></div>
+<div class="paragraph"><p>hp-clean --help # for help
+hp-clean -p&lt;printer_name&gt;
+ ie hp-clean -php5850-ok</p></div>
+</div>
+</div>
+</div>
+</div>
+<div id="footnotes"><hr></div>
+<div id="footer">
+<div id="footer-text">
+Version 1.27<br>
+Last updated
+ 2019-07-03 09:06:17 PDT
+</div>
+</div>
+</body>
+</html>
