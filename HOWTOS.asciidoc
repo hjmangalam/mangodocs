@@ -1,0 +1,3390 @@
+Harry's HOWTOs
+==============
+Harry Mangalam <harry.mangalam@uci.edu>
+v1.27, Jan 30, 2019
+:icons:
+
+// fileroot="/home/hjm/FF/HOWTOS"; asciidoc -a icons -a toc2 -a toclevels=3 -b html5 -a numbered ${fileroot}.txt;  scp ${fileroot}.html ${fileroot}.txt  moo:~/public_html
+
+
+//This should be organized into sections, like
+// Scientific Apps
+//   R
+// System Administration
+//   Disks and RAID
+//     mdadm
+//     hardware raid
+//   Networking
+//    Users
+// Programming Languages
+//   Perl
+//   Python
+//   C
+//   SQL
+
+
+// ####################  System   #################### //
+[[hpccluster]]
+== HPC hints & tweaks
+
+=== callee script breakage
+
+There's a script that runs on new HPC logins to have users self-identify for Garr's accounting program, called:
+ 
+ /data/hpc/bin/hpc-user-self-identifying-callee 
+
+(authored in the mists of time by Adam Brenner, modified by Edward).
+ 
+which further calls a python routine that calls UCI's LDAP server to identify the user's PI:
+ 
+ /data/hpc/accounting/user-identification/hpc-user-self-identifying.py
+ 
+Since the LDAP change-over, the LDAP call has been failing each time its run, confusing users and generating support tix.
+ 
+It's now fixed (until the next LDAP changeover).  Also, this script is triggered if there's not a user-named lockfile in
+
+ /data/hpc/accounting/user-identification/locks/
+ 
+Somehow these locks have mostly become owed by 'root:staff' instead of by the user, which causes errors should they try to re-run the script.  I haven't changed that since probably very few ppl will try that.  just an FYI.
+
+
+=== gnuplot file sizes
+
+---------------------------------------------------
+module purge; module load perl/5.26.1; module load gnuplot
+cd <root of filesystem>
+# fllowing also tees the 'ls -lR' into a file of same name
+# to save the data should anything explode.
+ls -lR | scut -f=4 | tee ls-lR | sort -gr | feedgnuplot \
+ --extracmds 'set logscale y'
+
+---------------------------------------------------
+
+=== Restart KDE Window Manager
+--------------------------------------------------
+kwin --restart & # simple!
+--------------------------------------------------
+
+and the plasmashell (kpanel):
+
+--------------------------------------------------
+kquitapp plasmashell && kstart plasmashell
+# or
+kbuildsycoca5 && kquitapp plasmashell && kstart plasmashell
+--------------------------------------------------
+
+=== Setting Core Dumps
+Because we don't want everyone to be dumping corefiles all over the place, we allow 
+coredumps on a one-off basis.  Change the user in the file '/data/shell-syswide-setup/system-wide-bashrc'.  
+The section below shows user 'anassar'
+
+--------------------------------------------------
+if [ "$USER" != "anassar" ]; then
+        ulimit -c 0
+fi
+--------------------------------------------------
+
+=== environment modules
+
+See http://modules.sourceforge.net/man/modulefile.html[this page] for all the module-related stuff.
+
+== System Administration
+
+=== loadavg exceptions
+Sometimes loadavg goes berserk for various reasons.  The most frequent offender leading to this state is not things using the CPU
+since that's obvious, but processes stuck in limbo, usually due to network disk mount problems.  For example, we often have 
+NFS disks that go walkabout and when users try to do an 'ls' or 'du' on those mounts, the process just hangs, driving up the loadavg, 1 unit per hung command.  What commands are doing this is often difficult to discern, but the 'ps' command has an option that will help.
+
+From our CentOS 6.9 system
+----------------------------------------------------------
+PROCESS STATE CODES
+       Here are the different values that the s, stat and state output specifiers (header "STAT" or "S")
+       will display to describe the state of a process.
+    State   Explanation
+       D    Uninterruptible sleep (usually IO)
+       R    Running or runnable (on run queue)
+       S    Interruptible sleep (waiting for an event to complete)
+       T    Stopped, either by a job control signal or because it is being traced.
+       W    paging (not valid since the 2.6.xx kernel)
+       X    dead (should never be seen)
+       Z    Defunct ("zombie") process, terminated but not reaped by its parent.
+----------------------------------------------------------
+
+On another system, with slightly different explanations
+----------------------------------------------------------
+State   Explanation
+   D    Marks a process in disk (or other short term, uninterruptible) wait.
+   I    Marks a process that is idle (sleeping for longer than about 20 seconds).  
+   L    Marks a process that is waiting to acquire a lock.
+   R    Marks a runnable process.
+   S    Marks a process that is sleeping for less than about 20 seconds.
+   T    Marks a stopped process.
+   W    Marks an idle interrupt thread.
+   Z    Marks a dead process (a "zombie").
+----------------------------------------------------------
+
+The *D* status flag in a 'ps' output indicates that the process is 'disk wait' state - waiting for the disk to respond.  If it's a hung NFS disk mount, NFS has the "feature" that it will not return a 'fugedaboutit, I'm dead', but a 'just stepped out, will be back soon, please wait' signal so the requesting process will do just that.  In some cases (NFS server rebooting),this is a good thing. In others (NFS server power supplies dead), not so much.
+
+The extra apparent 'loadavg' doesn't affect the actual performance of the requesting server, but it screws up a lot of stats if you're trying to use 'loadavg' as an actual server load metric which many monitoring systems do (ganglia, for one).
+
+So to track down the offending processes, search for those processes which are waiting on disk.
+--------------------------------------------------------
+ps -e  u  | grep ' D '  # find all processes waiting on Disk
+ps -e  u  | grep ' Ds ' # ditto
+--------------------------------------------------------
+and kill them off.  In many cases the 1st will find 'ls' and 'du'.  The 2nd will often find instances of 'bash' which have hung wating for disk reads to complete.
+
+On our cluster, on a login node with 16 cores, which had a loadavg of 24, killing off those processes that were waiting on disk (using the 'D' identifier) dropped the loadavg from 24 to 14.  When I killed off those procs with 'Ds', loadavg continued to drop to the normal range ~ 1.5.
+
+See https://goo.gl/uF8Hnf[here]
+
+=== How to figure out Hardware
+It's often useful to figure out what's in a system remotely or without breaking open the case, or to catalog/query various bits of internal hardware.  Herewith, 3 methods for doing so. 
+
+- lspci - brief overview, doesn't need root, can dump some interesting info such as with '-k' the kernel driver for that hardware, '-vvv' for everything known about the device
+- lshw - more detailed, doesn't really correspond to physical layout.  Also supports classes, but in a different way.  Use 'lshw -short | less' to get a short view with Class of device.
+- dmidecode - super detailed, should use DMI types to list the sections, otherwise it's VERY long. (ie '-t 9' are the PCI slots); corresponds better  to the physical layout of the system.
+
+=== Sensors
+Scan all the sensors on a (modern) machine. Down to the NVME SSDs.
+
+--------------------------------------------------------
+$ ipmitool sensor
+
+CPU1 Temp        | 59.000     | degrees C  | ok    | 5.000     | 5.000   
+CPU2 Temp        | 58.000     | degrees C  | ok    | 5.000     | 5.000   
+System Temp      | 27.000     | degrees C  | ok    | 5.000     | 5.000   
+Peripheral Temp  | 37.000     | degrees C  | ok    | 5.000     | 5.000   
+MB_NIC_Temp1     | na         |            | na    | na        | na      
+MB_NIC_Temp2     | na         |            | na    | na        | na      
+VRMCpu1 Temp     | 37.000     | degrees C  | ok    | 5.000     | 5.000   
+VRMCpu2 Temp     | 38.000     | degrees C  | ok    | 5.000     | 5.000   
+VRMSoc1 Temp     | 52.000     | degrees C  | ok    | 5.000     | 5.000   
+VRMSoc2 Temp     | 52.000     | degrees C  | ok    | 5.000     | 5.000   
+VRMP1ABCD Temp   | 42.000     | degrees C  | ok    | 5.000     | 5.000   
+VRMP1EFGH Temp   | 32.000     | degrees C  | ok    | 5.000     | 5.000   
+VRMP2ABCD Temp   | 33.000     | degrees C  | ok    | 5.000     | 5.000   
+VRMP2EFGH Temp   | 43.000     | degrees C  | ok    | 5.000     | 5.000   
+P1-DIMMA1 Temp   | na         |            | na    | na        | na      
+P1-DIMMA2 Temp   | 39.000     | degrees C  | ok    | 5.000     | 5.000   
+P1-DIMMB1 Temp   | na         |            | na    | na        | na      
+...
+--------------------------------------------------------
+
+
+=== OS Maint
+
+==== Change Dir to own files
+This changes the ownership to sticky so that any files writ here will be owned by the dir owner.
+--------------------------------------------------------
+chmod g+s dir
+--------------------------------------------------------
+
+==== Boot single, ignoring fstab
+
+From http://www.fclose.com/b/linux/2500/bypassing-bad-fstab-failure-while-booting-linux/[here].
+
+Interrupt the boot (usually 'e') to edit the kernel boot line and add the following to the kernel line
+--------------------------------------------------
+
+kernel .... single rw init=/bin/bash
+--------------------------------------------------
+
+that should boot to single user mode, IGNORING the '/etc/fstab' enabling you to change it to correct a bad fstab entry
+(but haven't tried it yet..)
+
+
+==== Get MacOSX OS ver #
+
+------------------------------------------------------------
+$ uname -a
+Darwin flop.nac.uci.edu 9.7.0 Darwin Kernel Version 9.7.0: Tue Mar 31
+22:54:29 PDT 2009; root:xnu-1228.12.14~1/RELEASE_PPC Power Macintosh
+
+# or
+
+$ sw_vers
+ProductName:    Mac OS X
+ProductVersion: 10.5.7
+BuildVersion:   9J61
+------------------------------------------------------------
+
+==== Install MacOSX pkgs via cmdline
+
+
+if the disk image *OSXvnc1.71.dmg* is downloaded at /Users/hjm
+
+-----------------------------------------------------------------------------
+12:24:22 hjm@cg1 ~
+72 $ hdiutil attach OSXvnc1.71.dmg
+Checksumming Driver Descriptor Map (DDM : 0)...
+     Driver Descriptor Map (DDM : 0): verified   CRC32 $876DBC1A
+Checksumming Apple (Apple_partition_map : 1)...
+     Apple (Apple_partition_map : 1): verified   CRC32 $3FC18960
+Checksumming disk image (Apple_HFS : 2)...
+          disk image (Apple_HFS : 2): verified   CRC32 $3A4E8BDD
+Checksumming  (Apple_Free : 3).......
+                    (Apple_Free : 3): verified   CRC32 $00000000
+verified   CRC32 $3A457474
+/dev/disk1              Apple_partition_scheme
+/dev/disk1s1            Apple_partition_map
+/dev/disk1s2            Apple_HFS                       /Volumes/OSXvnc
+
+
+12:24:38 hjm@cg1 ~
+73 $ df
+Filesystem           1K-blocks      Used Available Use% Mounted on
+/dev/disk0s3         159955416 153355312   6344104  97% /
+devfs                        1         1         0 100% /dev
+fdesc                        1         1         0 100% /dev
+<volfs>                    512       512         0 100% /.vol
+/dev/disk1s2             10408      9528       880  92% /Volumes/OSXvnc
+
+-----------------------------------------------------------------------------
+
+
+if it's the standard MacOSX app, it is actually a folder which has all the bits
+inside it and it can be installed simply by copying it to the /Applications folder.
+
+
+
+==== Reconfigure exim
+
+Don't bother trying to hand-edit all the options in the config file.  MUCH
+easier to just run the reconfig routine and type in the correct settings.
+After trying to reset the hostname for many minutes but not being able to
+find it, I just re-ran this and all was well.
+
+----------------------------------------------------------------------------
+dpkg-reconfigure exim4-config  # (as root)
+----------------------------------------------------------------------------
+
+
+==== Make an 'initrd' image to match your new kernel
+
+yaird is easiest:
+
+-----------------------------------------------------------------------------
+yaird --verbose --output=/boot/initrd.img-2.6.22.1 2.6.22.1
+-----------------------------------------------------------------------------
+
+(but got a fatal error the last time).
+However the update-initramfs tool from the initramfs-tools package.
+
+
+-----------------------------------------------------------------------------
+update-initramfs -k 2.6.22.1 -c -v
+-----------------------------------------------------------------------------
+
+(spits out a lot of info about the build, but seems to work just fine).
+
+
+
+==== Updating SL6.2 repos
+
+http://www.dedoimedo.com/computers/scientific-linux-repos.html[see here].
+
+==== Replicate a Debian system
+
+It's often convenient to be able to re-load all the packages from one syst to another (replicating an exisiting system, post-major upgrade on a system)
+
+http://baudizm.blogsome.com/2008/12/01/quick-tip-use-dpkg-to-replicate-between-ubuntu-installs[See this article] or briefly:
+
+on the old machine:
+--------------------------------------------------------------------
+ dpkg --get-selections > pkginstalled
+--------------------------------------------------------------------
+
+on the new machine:
+--------------------------------------------------------------------
+$ dpkg --set-selections < pkginstalled
+$ apt-get dselect-upgrade
+--------------------------------------------------------------------
+
+If you get a bunch of warnings like: 'package blabla not in database'
+
+You'll need to install and use the 'dselect' package to set things right:
+
+--------------------------------------------------------------------
+$ sudo apt-get install dselect
+$ sudo dselect
+   -> Update
+   -> Install
+--------------------------------------------------------------------
+
+==== List info about installed RPMs
+http://www.cyberciti.biz/faq/howto-list-installed-rpm-package/[Nice summary]
+
+--------------------------------------------------------------------
+'rpm -qa'    # lists all the rpms installed, for example.
+--------------------------------------------------------------------
+
+==== List files in a .rpm
+
+-----------------------------------------------------------
+rpm -qlp yaddayadda.rpm  # list the files in a specific rpm
+rpm -ql package-name     # list the files an already installed rpm
+-----------------------------------------------------------
+
+==== Unpack a RPMs
+-----------------------------------------------------------
+# this will unpack the rpm into a tree rooted at the cwd.
+rpm2cpio thetarget.rpm | cpio -idmv
+-----------------------------------------------------------
+
+==== Rebuild the RPM database
+
+-----------------------------------------------------------
+yum clean all
+rpm --rebuild
+-----------------------------------------------------------
+
+==== Repair a broken YUM database
+
+----------------------------------------------------------------------------
+yum clean metadata
+yum clean dbcache
+yum update
+
+# or even
+yum clean all
+----------------------------------------------------------------------------
+
+==== dpkg Cheatsheet
+
+http://www.cyberciti.biz/howto/question/linux/dpkg-cheat-sheet.php[Nice Summary]
+
+generate a list of all the installed packages in a way that they can
+be reinstalled or verified post install.
+---------------------------------------------------------------------------
+dpkg --get-selections |grep -v deinstall | cut -f1
+---------------------------------------------------------------------------
+
+==== Force a package to be installed, even if it conflicts with an existing package.
+Sometimes even apt-get f*cks up.  To unf*ck it, sometimes you have to force things a bit.  Once the 'apt-get -f install'
+command has failed in all its forms and you have no more fingernails to gnaw off, this may be useful
+----------------------------------------------------------
+dpkg -i --force-overwrite /var/cache/apt/archives/whatever-deb-is-causing-the-problem......deb
+----------------------------------------------------------
+This admittedly crude approach is invaluable once the above almost-always-works 'apt-get -f install' fails.
+BUT, not to be taken lightly.
+
+==== Create a USB from an ISO with 7z
+
+-------------------------------------------------------------------------
+7z x name-of-iso.iso -o/path/to/mounted/USB/drive
+-------------------------------------------------------------------------
+see http://goo.gl/F3bk0m[this Ubuntu page for more detail.]
+
+==== Correct the 'not a comR binary' error booting from a USB
+
+Mount the USB again on the PC. Then execute the following lines as root:
+
+-------------------------------------------------------------------------
+cp -r /usr/lib/syslinux/vesamenu.c32 </USB/mountpoint>/syslinux/
+syslinux /dev/sdb1    # or whatever the device partition is.
+-------------------------------------------------------------------------
+
+==== ECC Memory errors
+
+(from the http://moo/~hjm/clusterfork/[clusterfork] docs)
+
+this requires that the http://en.wikipedia.org/wiki/Error_detection_and_correction[EDAC system] is activated, the kernel module is inserted correctly and that the logging is working correctly.  On CentOS (>5.5) and the
+later Ubuntu releases (>= 10.04), it appears to be.
+----------------------------------------------------------------------------
+cd /sys/devices/system/edac/mc &&  grep [0-9]* mc*/csrow*/[cu]e_count
+----------------------------------------------------------------------------
+
+strace
+^^^^^^
+Very useful utility to find out what an application is doing.
+ie *strace -p [PID of process]*
+See https://blogs.oracle.com/ksplice/entry/strace_the_sysadmin_s_microscope[this
+page for some good examples].
+
+To strace the children threads of a parent, try this:
+----------------------------------------------------------------------------
+ps -efL|grep <Process Name> |less
+
+
+# Trace child processes as they are created by currently traced processes as
+# a result of the fork(2) system call.
+strace -f -p
+----------------------------------------------------------------------------
+and then find the child PIDs from that if you need them.
+http://meenakshi02.wordpress.com/2011/02/02/strace-hanging-at-futex/[From here]
+
+
+Updating /etc/init.d scripts
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+----------------------------------------------------------------------------
+sudo update-rc.d <basename> defaults
+# ie
+sudo update-rc.d sgeexecd defaults
+----------------------------------------------------------------------------
+
+
+Filesystems, RAIDs, and Disks
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+==== Maintaining timestamps & ownership of tarchives
+When tarchiving old dirs, it's useful to maintain the ownership and timestamp for storage management.
+
+To do this with a dir called 'freesurfer'
+-------------------------------------------------------------------
+$ ls -ltd freesurfer  # note the date and ownership
+drwxr-xr-x 32 small braincircuits          59 Apr  7  2016 freesurfer
+
+# get the current timestamp and owner of the dir
+TS=`stat --printf=%y freesurfer`
+OWNER=`ls -l freesurfer  | scut -f='2 3' --od='.'`
+
+# tarchive the directory as root
+tar -czf freesurfer.tar.gz freesurfer
+
+# Note that the creator (root) owns the tarchive and the timestamp 
+# is the time of the creation (now)
+$ ls -l freesurfer.tar.gz
+-rw-r--r-- 1 root.root 92860763662 Mar 25 08:56 freesurfer.tar.gz
+
+# So rechown it:
+$ chown $OWNER freesurfer.tar.gz
+
+# and touch it to the original date:
+$ touch -d"${TS}"  freesurfer.tar.gz
+
+$ ls -lh  freesurfer.tar.gz
+-rw-r--r-- 1 small braincircuits 87G Apr  7  2016 freesurfer.tar.gz
+-------------------------------------------------------------------
+
+
+==== ulimit & open files
+http://stackoverflow.com/questions/12079087/fork-retry-resource-temporarily-unavailable[[See this page]
+
+---------------------------------------------------------------
+$ sysctl fs.file-nr
+fs.file-nr = 5504       0       26301393
+#   where the #s above mean:
+#         <in_use> <unused_but_allocated> <maximum>
+
+# what a users file descriptor limit is
+ $ ulimit -Hn
+8192
+
+#  how many file descriptors are in use by a user
+$ lsof -u <username>   2>/dev/null | wc -l
+2876
+---------------------------------------------------------------
+==== BeeGFS commands
+(from dfs-3-1)
+
+BeeGFS GUI:
+     Password: admin
+     java -jar /opt/beegfs/beegfs-admon-gui/beegfs-admon-gui.jar 
+
+BeeGFS Usefull Commands:
+     beegfs-check-servers
+     beegfs-ctl --listnodes   --nodetype=metadata   --details
+     beegfs-ctl --listnodes   --nodetype=storage    --details
+     beegfs-ctl --listnodes   --nodetype=client     --details
+     beegfs-ctl --listnodes   --nodetype=management --details
+     beegfs-ctl --listtargets --nodetype=storage    --state
+     beegfs-ctl --listtargets --nodetype=meta       --state
+
+Optimization:
+     /data/system-files/dfs3-optimize.sh 
+     
+
+ZFS Useful commands:
+
+    zpool status
+    zfs get compressratio
+    zpool get all | grep autoreplace
+
+List Drives byUUID and Serial
+    /data/system-files/dfs3-list-drives-by-uuid-serial.sh
+
+==== remount specific BeeGFS 
+
+ie for /dfs3
+
+-------------------------------------------------
+    service beegfs-client  stop dfs3
+    service beegfs-helperd stop dfs3
+
+    service beegfs-helperd start dfs3
+    service beegfs-client  start dfs3
+    
+    # or simply 
+    
+    service beegfs-client  restart dfs3
+    service beegfs-helperd restart dfs3
+    
+-------------------------------------------------
+
+
+==== ZFS commands
+
+See https://pthree.org/2012/04/17/install-zfs-on-debian-gnulinux/[this link] for a 
+very good description of ZFS on Debian Linux.  The commands blow are largely taken from 
+that doc.
+
+- *zpool create 'poolname' 'devices'* creates a simple RAID0 of the devices named. ie:
+'zpool create tank sde sdf sdg sdh' (note that you don't have to use the full device name).  
+And You shouldn't use raw device names anyway, but the disk UIDs which are found in 
+'/dev/disk/by-id'
+
+- *zpool status '[poolname]'* will dump the status of that pool.  If the 'poolname' 
+is omitted, 'zpool' will dump the status of all the pools it knows about.
+
+- *zfs get all [poolname]/[folder] | grep compressratio* will dump the compression 
+ratios for the pool mentioned (http://www.sotechdesign.com.au/category/zfs/[see here])
+
+- *zfs get all* will dump everything it knows about the ZFS pools, disk, EVERYTHING.
+pipe it into 'less'.
+
+- *zfs set mountpoint=/foo_mount data* will make zfs mount your data pool to a 
+designated foo_mount point of your choice.
+
+- *zpool events* will dump all the 'events' that it has detected.
+
+
+//==== Some notes on disks, ECC errors, replacement, timeouts.
+
+//See also http://smartmontools.sourceforge.net/badblockhowto.html[the smartmontools 
+// badblocks page on this], and the 
+// http://sourceforge.net/apps/trac/smartmontools/wiki/FAQ[smartmontools FAQ].
+
+
+//When disks are manufactured these days, they are equipped with a certain number of spare sectors that can be put into service when some error (usually ECC) make one sector unreliable.
+//In the 3TB disks that we're using for our raids, fdisk says:
+//-------------------------------------------------------------------
+//Disk /dev/sdb: 3000.6 GB, 3000592982016 bytes
+//255 heads, 63 sectors/track, 364801 cylinders, total 5860533168 sectors
+//Units = sectors of 1 * 512 = 512 bytes
+//Sector size (logical/physical): 512 bytes / 4096 bytes
+//I/O size (minimum/optimal): 4096 bytes / 4096 bytes
+//-------------------------------------------------------------------
+//That implies that of the reported 5860533168 sectors of 512 bytes each = 3.00059298202e+12, all of them are dedicated to storage and none are spare.
+
+//However,
+
+==== mdadm stopping RAIDS
+
+In order for 'mdadm' to stop a RAID, the RAID needs to be unused by other processes.  
+Even if it appears to be untouched by local processes (via 'lsof' or 'fuser'), 
+if the FS is NFS-exported, it can still be locked by remote processes even tho they 
+are not immediately associated with the FS.
+
+'mdadm' will complain that it can't stop the RAID:
+
+------------------------------------------------------------------------
+[root@compute-3-9 ~]# mdadm --stop /dev/md0
+mdadm: Cannot get exclusive access to /dev/md0:Perhaps a running process, mounted filesystem or active volume group?
+------------------------------------------------------------------------
+
+and 'fuser' will list
+ie
+------------------------------------------------------------------------
+[root@compute-3-9 compute-3-9]# fuser -m /compute-3-9
+/compute-3-9:            1rce     2rc     3rc     4rc     5rc     6rc
+    7rc    8rc     9rc    10rc    11rc    12rc    13rc    14rc    15rc
+   16rc    17rc    18rc    19rc    20rc    21rc    22rc    23rc    24rc
+   25rc    26rc    27rc    28rc    29rc    30rc    31rc    32rc    33rc
+   34rc    35rc    36rc    37rc    38rc    39rc    40rc    41rc    42rc
+   43rc    44rc    45rc    46rc    47rc    48rc    49rc    50rc  ...
+------------------------------------------------------------------------
+So you need to stop the NFS service as well as as killing off all the other processes (or letting them finish) with th emore polite 'umount -l /dev/md0' (umounts the FS but lets the current open files close 'naturally')
+
+Once you stop the NFS services:
+------------------------------------------------------------------------
+[root@compute-3-9 ~]# /etc/init.d/nfs stop
+Shutting down NFS daemon:                                  [  OK  ]
+Shutting down NFS mountd:                                  [  OK  ]
+Shutting down NFS quotas:                                  [  OK  ]
+Shutting down NFS services:                                [  OK  ]
+Shutting down RPC idmapd:                                  [  OK  ]
+
+[root@compute-3-9 ~]# mdadm --stop /dev/md0
+mdadm: stopped /dev/md0
+------------------------------------------------------------------------
+mdadm can stop the raid (as long as there are no more processes accessing it.)
+
+==== deleting the mdadm RAID info from the disks
+If you want to use the disks from one mdadm raid in another, you'll 
+have to 'blank them' 1st by removing the superblock info.
+
+ie, if your raid reports itself as:
+------------------------------------------------------------------------
+$ cat /proc/mdstat 
+Personalities : [raid6] [raid5] [raid4] 
+md127 : active (auto-read-only) raid5 sdc1[0] sdf1[4] sde1[2] sdd1[1]
+      8790790656 blocks super 1.1 level 5, 512k chunk, algorithm 2 [4/4] [UUUU]
+      bitmap: 0/22 pages [0KB], 65536KB chunk
+
+unused devices: <none>
+------------------------------------------------------------------------
+then you'll have to stop it first (described in more detail above):
+------------------------------------------------------------------------
+Fri May 22 15:42:38 root@pbs2:~
+247 $ mdadm --stop /dev/md127
+mdadm: stopped /dev/md127
+------------------------------------------------------------------------
+and finally erase the superblock info:
+------------------------------------------------------------------------
+$ for II in sdc1 sdf1 sde1 sdd1; do  mdadm --zero-superblock /dev/${II}; done
+# all gone.
+------------------------------------------------------------------------
+Now you can remove the disks and re-use them in another system.
+
+
+
+==== replacing a disk in an mdadm RAID
+
+*DO NOT JUST PULL THE BAD DISK OUT*  If you do, see below.
+
+The correct way to replace a disk in a mdadm RAID is to:
+
+. *mdadm fail* the disk
+. *mdadm remove* the disk
+. *only then* physically remove the disk (if you have a hotswap backplane) or
+. power down the system and *THEN* remove the disk, then power the system back up
+. add the disk back into the RAID.
+
+
+In this case, it's /dev/sdc, from both /proc/mdstat and dmesg:
+-----------------------------------------------------------
+cat /proc/mdstat                       
+Personalities : [raid6] [raid5] [raid4] 
+md0 : active raid5 sdf[5] sdd[2] sdc[1](F) sde[6] sdb[0]
+      11721064448 blocks super 1.0 level 5, 1024k chunk, algorithm 2 [5/4] [U_UUU]
+# note that '[U_UUU]' - that shows that the second disk in the RAID has died.
+# in this case, it's /dev/sdc, from both the postional info in the [U_UUU]
+# and from the dmesg output, which looks like this:
+...
+end_request: I/O error, dev sdc, sector 5439271384
+end_request: I/O error, dev sdc, sector 5439271384
+md/raid:md0: read error not correctable (sector 5439271384 on sdc).
+sd 3:0:0:0: [sdc] Unhandled sense code
+sd 3:0:0:0: [sdc]  
+sd 3:0:0:0: [sdc]  
+sd 3:0:0:0: [sdc]  
+sd 3:0:0:0: [sdc] CDB: 
+end_request: I/O error, dev sdc, sector 5439272072
+end_request: I/O error, dev sdc, sector 5439272072
+md/raid:md0: read error not correctable (sector 5439272072 on sdc).
+-----------------------------------------------------------
+
+The bad disk can also be identified by close inspection of the LEDs if they're
+connected to the activity monitor pins:
+
+ ls -lR /raid/mount/point
+
+Will cause all the disks into 'blinking/read' activity, *EXCEPT the bad disk*.
+Now that we know which disk, we can replace it.
+
+The 1st step is to fail it.
+-----------------------------------------------------------
+# the bad disk is /dev/sdc (the whole disk; not just a partition) 
+# and in this case, we have a hotswap backplane
+BADDISK=/dev/sdc  # for ease of reference
+
+# the 1st step is to 'mdadm fail' it.
+mdadm --manage /dev/md0 --fail $BADDISK
+mdadm: set /dev/sdc faulty in /dev/md0
+
+# then 'mdadm remove' it
+mdadm --manage /dev/md0 --remove $BADDISK
+mdadm: hot removed /dev/sdc from /dev/md0
+
+# ONLY THEN, physically pull the disk.  Once it has been replaced with a disk 
+# of AT LEAST the same size, and the disk has spun up and been detected by the OS
+# 'mdadm add' the new disk (which we still refer to as $BADDISK)
+# mdadm --manage /dev/md0 --add $BADDISK
+mdadm: added /dev/sdc
+
+# then check with /proc/mdstat again
+cat /proc/mdstat
+Personalities : [raid6] [raid5] [raid4] 
+md0 : active raid5 sdc[7] sdf[5] sdd[2] sde[6] sdb[0]
+      11721064448 blocks super 1.0 level 5, 1024k chunk, algorithm 2 [5/4] [U_UUU]
+      [==>..................]  recovery = 11.1% (326363808/2930266112) 
+      finish=438.4min speed=98984K/sec
+-----------------------------------------------------------
+
+If you drop a disk, *make sure to fail the failed disk BEFORE you physically remove it*.
+
+
+
+However if you don't do that, you can still recover, in a very nervous way:
+(In the following example, /dev/sdb went bad and I stupidly removed it without
+failing it out of the RAID6 1st. That means that mdadm lost track of 'sdb' and 
+I wasn't able to add the replacement back in.  When I tried to, I got:
+
+------------------------------------------------------------------------
+$ mdadm --manage /dev/md0 --add /dev/sdc
+mdadm: add new device failed for /dev/sdb as 6: Invalid argument
+------------------------------------------------------------------------
+In order to repair the RAID6 now, you have to re-create the RAID and THEN add the 
+previously failed disk back in.
+
+* stop the mdadm raid: *mdadm -S /dev/md0*
+* re-create the RAID:
+------------------------------------------------------------------------
+# note the 'missing' value in the create line which acts as a placeholder
+mdadm --create /dev/md0 --assume-clean --level=6 --verbose --raid-devices=6 \
+/dev/sda missing /dev/sdc  /dev/sdd  /dev/sde  /dev/sdf
+#        ^^^^^^^
+mdadm: layout defaults to left-symmetric
+mdadm: layout defaults to left-symmetric
+mdadm: chunk size defaults to 512K
+mdadm: /dev/sda appears to be part of a raid array:
+       level=raid6 devices=6 ctime=Thu Apr 16 10:33:32 2015
+mdadm: /dev/sdc appears to be part of a raid array:
+       level=raid6 devices=6 ctime=Thu Apr 16 10:33:32 2015
+mdadm: /dev/sdd appears to be part of a raid array:
+       level=raid6 devices=6 ctime=Thu Apr 16 10:33:32 2015
+mdadm: /dev/sde appears to be part of a raid array:
+       level=raid6 devices=6 ctime=Thu Apr 16 10:33:32 2015
+mdadm: /dev/sdf appears to be part of a raid array:
+       level=raid6 devices=6 ctime=Thu Apr 16 10:33:32 2015
+mdadm: size set to 2930135040K
+mdadm: automatically enabling write-intent bitmap on large array
+Continue creating array? y
+mdadm: Defaulting to version 1.2 metadata
+mdadm: array /dev/md0 started.
+------------------------------------------------------------------------
+* then ad the 'new' /dev/sdb back:
+------------------------------------------------------------------------
+[root@compute-7-1 /]# mdadm --add /dev/md0 /dev/sdb
+mdadm: added /dev/sdb
+
+[root@compute-7-1 /]# cat /proc/mdstat
+Personalities : [raid6] [raid5] [raid4]
+md0 : active raid6 sdb[6] sdf[5] sde[4] sdd[3] sdc[2] sda[0]
+      11720540160 blocks super 1.2 level 6, 512k chunk, algorithm 2 [6/5] [U_UUUU]
+      [>....................]  recovery =  0.0% (562176/2930135040) finish=1129.0min speed=43244K/sec
+      bitmap: 0/22 pages [0KB], 65536KB chunk   
+------------------------------------------------------------------------
+* now it can be mounted and used as it's rebuilding.
+
+See:
+<http://www.linuxquestions.org/questions/linux-server-73/mdadm-error-replacing-a-failed-disk-909577/>
+
+
+
+==== Wiping disks
+Truly wiping disks to prevent the NSA from recovering yur data is fairly
+pointless since they have
+so many other avenues to that data.  However, it you want to pass on a laptop
+or sell an old disk on ebay without allowing your private info to be easily
+recovered, you can try 'dd' or 'badblocks' as described below:
+'dd' without a 'count' parameter will just keep going until it hits the end of the disk
+so the time to finish will be proportional to the size of the disk and the speed at which it
+can be forced to write (modern disks write at about 100MB/s so a 3TB disk will
+take ~ 8.3hr to wipe the entire disk this way. Older disk of the older laptop size
+will be smaller (say 80GB) and slower (say 50MB/s), so such a disk will take about an hour.
+------------------------------------------------------------------------
+
+dd bs=1M if=/dev/zero of=/dev/sd#
+
+or
+
+dd bs=1M if=/dev/urandom of=/dev/sd#
+
+or
+
+badblocks -wvs /dev/sd#
+
+------------------------------------------------------------------------
+See http://superuser.com/questions/86952/disk-wiping-other-than-dban[this superuser thread] for a longer discussion and more hints.
+
+
+==== Remount running filesystems to change options
+
+Sometimes it's useful to change options when a filesystem is running.  This is possible and safe with modern Liux systems.
+
+---------------------------------------------------------------
+mount -o remount,rw,noatime,nodiratime,swalloc,largeio,barrier,sunit=512,swidth=8192,allocsize=32m,inode64 /raid2
+---------------------------------------------------------------
+
+examining /etc/mtab should show you that the option has changed.
+
+
+==== Re-setup Fraunhofer on HPC nodes
+Need to reset the env variables 'HPC_CURRENT_KERNEL_RPM'
+*ON THE NODE THAT you're trying to fix*
+
+---------------------------------------------------------------
+export HPC_CURRENT_KERNEL_RPM=/data/node-setup/node-files/rpms/kernel/whatever_it_is
+# like this:
+# export HPC_CURRENT_KERNEL_RPM=/data/node-setup/node-files/rpms/kernel/kernel-2.6.32-358.18.1.el6.x86_64.rpm
+# and then...
+/data/node-setup/add-fhgfs.sh  # this is pretty robust.
+---------------------------------------------------------------
+
+==== Mounting/remounting multiple Fhgfs mounts
+
+From Adam Brenner:
+----------------------------------------------------------------------------
+to restart /fast-scratch we would use:
+
+  service fhgfs-helperd restart fast-scratch
+  service fhgfs-client restart fast-scratch
+
+Like wise, for /dfs1 (distributed filesystem 1)
+
+  service fhgfs-helperd restart dfs1
+  service fhgfs-client restart dfs1
+----------------------------------------------------------------------------
+
+
+
+==== Remove LSI 'Foreign' info
+
+When the disk that you're trying to use has some info designating it as part of 
+another array or somehow non-native, you have to clear the 'foreign' info.  Not 
+easy to find, but the storcli does have a command for it.
+
+----------------------------------------------------------------------------
+# on controller 0, for all foreign disks, clear the foreign info
+./storcli /c0/fall  del
+----------------------------------------------------------------------------
+
+==== Dump all relevant SMART info to a file
+
+----------------------------------------------------------------------------
+# then grep out the useful bits
+egrep '== /dev'\|'^Model'\|'^Device Model'\|'^Serial'\|'^Firm'\|'5 Reall'\|'9 Power'\|'187 Rep'\|'197 Cur'\|'198 Off'\|'199 UDMA'\|'^ATA Error'\|'Extended offline'
+ 
+# or with simpler plain grep:
+
+grep '== /dev\|^Model\|^Device Model\|^Serial\|^Firm\|5 Reall\|9 Power\|187 Rep\|197 Cur\|198 Off\|199 UDMA\|^ATA Error\|Extended offline'
+----------------------------------------------------------------------------
+
+==== Remove 3ware RAID info from a disk
+(this should also work with disks from LSI controllers - testing now)
+This will remove the 3ware RAID info so the disk won't show up as being part of a previous RAID.
+This is quite disconcerting when a supposedly newly tested disk comes up as a failed RAID.
+This has been verified at least 10x by me as well.
+
+See http://www.finnie.org/2010/06/07/howto-delete-a-3ware-dcb/[this entry]
+
+In order to have direct access to the disk, need to pull it and place into another
+computer, easiest is another compute node, but can also do it on a desktop with 
+the appropriate controller (dumb controllers are best; HW controllers will tend to 
+interpose their own overhead and presentation to the OS).  If the OS presents the 
+test disk directly in the form of '/dev/sdX', that's good.
+
+----------------------------------------------------------------------------
+DISK=sdX  # where X is the device of interest.  Prob not 'a'
+COUNT=2048  # indicator of how much overwrite you want to do on begin & end
+
+LBAS=$(cat /sys/block/$DISK/size)
+echo "LBAS = $LBAS"
+dd if=/dev/zero of=/dev/$DISK bs=512 count=$COUNT
+dd if=/dev/zero of=/dev/$DISK bs=512 seek=$(($LBAS-$COUNT)) count=$COUNT
+
+----------------------------------------------------------------------------
+[[smart9750]]
+==== Pull SMART data: 3ware 9750
+*Note that this only works on SATA disks on the 9750, not SAS disks.*
+
+If the 3DM2 interface shows 'ECC errors' on a SATA disk, or other hard to figure 
+out error, you can view the SMART info on a per-disk basis from behind the 3ware 
+9759 using the 'smartctl' CLI.  This will allow you to check the severity of the 
+error.  ie the 3DM2 interface will tell you that there is an 'ECC error' but 
+will not tell you whether this has resulted in uncorrectable reallocs (BAD), or 
+whether the ECCs trigggered a correction - a valid realloc (not uncommon).  You 
+don't want to see hundreds of reallocs, especially if they're increasing in #, 
+but having a low and stable number of reallocs is acceptable (depending on your 
+budget and your definition of 'acceptable').
+
+Otherwise, in order to check the error state of the disk, you have to pull the 
+disk to examine it on another machine, causing a degraded array, and a 
+several-hour rebuild.
+
+The 'smartctl' man pages does not make this very clear, but the sequences of 
+'devices' that you have to query is not the '/dev/twl[#]' but the '-d 
+3ware,start-finish'.  ie you use the same '/dev/twl0' and iterate over the 
+'3ware,start-finish' as shown below.  In my case, the active numbers are 8-43 in 
+a 36-slot Supermicro chassis.  Yours may be anything, but I would suggest 
+starting at 0 and going as high as you need to catch the beginning sequence. I 
+included the '(seq 7 44)' to see if any of the chassis' started numbering 
+outside of that range.  In my case they didn't.
+
+The grep filter just grabs the bits I'm interested in.  You'll have to look at 
+the 'smartctl' output to decide what you want.  You can see what gets grabbed in 
+the example output below.
+
+[source,bash]
+-------------------------------------------------------------------------
+$ for II in $(seq 7 44); do \
+  echo "== $II =="; \
+  smartctl -a -d 3ware,${II} /dev/twl0 | \
+  egrep 'Device Model'\|'Serial Number'\|'^  5 '\|'^  9 '\|'^187'\|'^198'\|'^199'; \
+done
+-------------------------------------------------------------------------
+And output is...
+-------------------------------------------------------------------------
+
+.... (much deleted)
+
+== 42 ==
+Device Model:     ST3000DM001-9YN166
+Serial Number:    W1F0BZCA
+  5 Reallocated_Sector_Ct   0x0033   100   100   036    Pre-fail  Always       -       0
+  9 Power_On_Hours          0x0032   084   084   000    Old_age   Always       -       14271
+187 Reported_Uncorrect      0x0032   100   100   000    Old_age   Always       -       0
+198 Offline_Uncorrectable   0x0010   100   100   000    Old_age   Offline      -       0
+199 UDMA_CRC_Error_Count    0x003e   200   200   000    Old_age   Always       -       0
+== 43 ==
+Device Model:     ST3000DM001-9YN166
+Serial Number:    W1F0A83L
+  5 Reallocated_Sector_Ct   0x0033   100   100   036    Pre-fail  Always       -       0
+  9 Power_On_Hours          0x0032   084   084   000    Old_age   Always       -       14271
+187 Reported_Uncorrect      0x0032   100   100   000    Old_age   Always       -       0
+198 Offline_Uncorrectable   0x0010   100   100   000    Old_age   Offline      -       0
+199 UDMA_CRC_Error_Count    0x003e   200   200   000    Old_age   Always       -       0
+== 44 ==
+ ... (no output, showing that the sequence stops at 43)
+-------------------------------------------------------------------------
+
+[[Falcon]]
+==== Pull SMART data: LSI SAS2008 Falcon
+This is one of the best controllers for ZFS, which has an 'lspci' string like this:
+
+ 03:00.0 Serial Attached SCSI controller: LSI Logic / Symbios Logic SAS2008 PCI-Express Fusion-MPT SAS-2 [Falcon] (rev 03)
+
+In order to extract the SMART data from this controller, you have to use the /dev/sgX syntax:
+
+-------------------------------------------------------------------------
+# this takes about 45s to run on a 36 disk chassis   
+rm -f diskscan;
+for ii in $(seq 0 39); do
+  echo "== /dev/sg${ii} ==" >> diskscan;
+  smartctl -iHA -l error -l selftest /dev/sg${ii} >> diskscan;
+done
+-------------------------------------------------------------------------
+
+for ii in b c d; do
+  echo >> diskscan;    
+  smartctl -iHA -l error -l selftest  /dev/sd${ii} | \
+  egrep '== /dev'\|'^Model'\|'^Device Model'\|'^Serial'\|'^Firm'\|'5 Reall'\|'9 Power'\|'187 Rep'\|'197 Cur'\|'198 Off'\|'199 UDMA'\|'^ATA Error'\|'Extended offline'   >> diskscan;  
+done
+
+
+
+[[smartmegaraid]]
+==== Pull SMART data: LSI MegaRAID
+Similarly, the smartmontools can pull a more limited amount of info from SAS 
+disks connected to an LSI MegaRAID controller.
+In the following, the controller is an LSI Nytro 81004i with a total of 36 
+Hitachi SAS disks in 2 RAIDs of 17 disks each with 1 Global Hot Spare and 1 
+spare disk.
+
+The disks themselves can be probed with an iteration (similar to the 3ware 
+controllers above) starting from 6 and going to 43 for some reason on  this 
+(36bay Supermicro) chassis.  An example output is shown below.
+--------------------------------------------------------------------
+# for SAS disks
+$ smartctl -a -d megaraid,6  /dev/sdb     
+
+# for SATA disks '-d sat+megaraid,6' - 'megaraid' by itself isn't sufficient.
+# where the ',6' is the disk slot number
+# depending on the chassis and how it's wired, this number can start at 6,7,or 
+# 8 and go as high as the number of slots + the initial offset.
+# the '/dev/sdb' is the device that the RAID controller presents to the OS.
+
+# can also invoke tests on the SAS disks as well as the SATA disks with:
+# smartctl -t short  -d megaraid,24  /dev/sdb
+# (note that the '/dev/sdb' can also be /dev/sda in the above, if the disks
+# are presented as 2 arrays. It just needs to be able to find the right controller
+# and either of the 2 will point to it.
+
+smartctl 5.43 2012-06-30 r3573 [x86_64-linux-2.6.32-431.5.1.el6.x86_64] (local build)
+Copyright (C) 2002-12 by Bruce Allen, http://smartmontools.sourceforge.net
+
+Vendor:               HITACHI
+Product:              HUS723030ALS640
+Revision:             A350
+User Capacity:        3,000,592,982,016 bytes [3.00 TB]
+Logical block size:   512 bytes
+Logical Unit id:      0x5000cca03e5f8fa4
+Serial number:                YVHPK6LK
+Device type:          disk
+Transport protocol:   SAS
+Local Time is:        Tue Feb 18 12:50:18 2014 PST
+Device supports SMART and is Enabled
+Temperature Warning Enabled
+SMART Health Status: OK
+
+Current Drive Temperature:     32 C
+Drive Trip Temperature:        85 C
+Manufactured in week 48 of year 2012
+Specified cycle count over device lifetime:  50000
+Accumulated start-stop cycles:  17
+Specified load-unload count over device lifetime:  600000
+Accumulated load-unload cycles:  325
+Elements in grown defect list: 0
+Vendor (Seagate) cache information
+  Blocks sent to initiator = 688410477985792
+
+Error counter log:
+           Errors Corrected by           Total   Correction     Gigabytes    Total
+               ECC          rereads/    errors   algorithm      processed    uncorrected
+           fast | delayed   rewrites  corrected  invocations   [10^9 bytes]  errors
+read:          0    55798         0     55798    6350629     140344.648           0
+write:         0    93714         0     93714      16256      10074.763           0
+verify:        0       20         0        20       1258          1.040           0
+
+Non-medium error count:        0
+No self-tests have been logged
+Long (extended) Self Test duration: 27182 seconds [453.0 minutes]
+--------------------------------------------------------------------
+
+Note that this doesn't have nearly the same amount of status info as it can pull from SATA disks.
+
+
+An example script to pull all the interesting data from an array (ie /dev/sdb) would be:
+--------------------------------------------------------------------
+RAID="/dev/sdb"
+for II in $(seq 6 43); do
+  echo ""
+  echo ""
+  echo "==== Slot $II ===="
+  smartctl -a -d megaraid,${II}  $RAID | egrep 'Vendor'\|'Product'\|'Serial number'
+done
+
+or as a 'one-liner':
+RAID="/dev/sdb";for II in $(seq 6 43); do  echo ""; echo ""; echo "==== Slot $II ====";\
+smartctl -a -d megaraid,${II}  $RAID; done
+
+# pipe output thru egrep "ID1|ID2" ID3|etc" to filter the ones you want as above.
+
+--------------------------------------------------------------------
+
+As an aside, the bash expression {a..z} does the same thing for characters.
+
+--------------------------------------------------------------------
+$ echo {a..g}
+a b c d e f g
+
+$ for II in {j..o}; do echo $II; done
+j
+k
+l
+m
+n
+o
+--------------------------------------------------------------------
+==== rsync trailing '/s'
+There's a quirk with rsync that is not a bug, but a required finesse.  Most Linux 
+utilities don't care if you include a trailing "/".  rsync does and it makes a difference both in the source and target.
+f you append the "/" to the source, but NOT the target, it tells rsync to sync the individual CONTENTS of the source to the target.
+--------------------------------------------------------------------
+rsync -av nco-4.2.6 moo:~/tnco
+--------------------------------------------------------------------
+results in what you usually expect:
+
+--------------------------------------------------------------------
+Tue May 17 10:29:14 [0.11 0.12 0.13]  hjm@moo:~/tnco
+509 $ ls
+nco-4.2.6/
+
+Tue May 17 10:30:02 [0.29 0.15 0.15]  hjm@moo:~/tnco
+512 $ ls -w 70 nco-4.2.6/
+COPYING      acinclude.m4  bld/         configure.eg  m4/
+INSTALL      aclocal.m4    bm/          configure.in  man/
+Makefile.am  autobld/      config.h.in  data/         qt/
+Makefile.in  autogen.sh*   configure*   doc/          src/
+--------------------------------------------------------------------
+
+BUT if you append the trailing "/" to the source, you get the CONTENTS of the source
+synced to the target:
+
+--------------------------------------------------------------------
+Tue May 17 10:31:31 [0.17 0.17 0.16]  hjm@moo:~/tnco
+516 $ ls -w 70
+COPYING      acinclude.m4  bld/         configure.eg  m4/
+INSTALL      aclocal.m4    bm/          configure.in  man/
+Makefile.am  autobld/      config.h.in  data/         qt/
+Makefile.in  autogen.sh*   configure*   doc/          src/
+--------------------------------------------------------------------
+
+If you append a trailing "/" to the target, makes no difference.
+
+
+--------------------------------------------------------------------
+rsync -av nco-4.2.6 moo:~/tnco
+# and 
+rsync -av nco-4.2.6 moo:~/tnco/
+--------------------------------------------------------------------
+
+will both result in the result immediately above.
+
+However, 
+--------------------------------------------------------------------
+rsync -av nco-4.2.6 moo:~/tnco
+# followed by
+rsync -av nco-4.2.6/ moo:~/tnco
+--------------------------------------------------------------------
+will result in a double syncing, with one set of files in the target dir and the second in
+a subdir named 'moo:~/tnco/nco-4.2.6'.
+
+so be careful.  You generally want the format WITHOUT any "/"s.
+
+
+==== rsync in/exclude patterns
+http://goo.gl/bFsJaG[This is a good overview] in understandable English.
+
+==== Quickly delete bazillions of files with rsync
+the following rsync command will recursively delete files about 10X faster than the usual 'rm -rf'.
+See http://www.slashroot.in/which-is-the-fastest-method-to-delete-files-in-linux[this link] to read about it in more detail.  It works.
+--------------------------------------------------------------------
+mkdir empty
+rsync -a --delete empty/ targetdir/
+# note that both dirs have a '/' at the end of the dir name. THIS IS REQUIRED
+
+# the above command will leave the top level dir, so follow with
+rm -rf targetdir/
+--------------------------------------------------------------------
+
+==== And even quicker with Perl
+Same link as above.
+--------------------------------------------------------------------
+perl -e 'for(<*>){((stat)[9]<(unlink))}'
+--------------------------------------------------------------------
+Careful - this microscript is recursive and non-interactive.
+
+==== Testing an mdadm RAID to check that the mail notification is working
+
+--------------------------------------------------------------------
+sudo mdadm --monitor --scan -1 -m 'hmangala@uci.edu' -t
+# should have the email in the /etc/mdadm/mdadm.conf file already tho.
+--------------------------------------------------------------------
+
+==== Primitive daily mdadm email notification
+This section has been expanded into http://moo.nac.uci.edu/~hjm/bduc/HOWTO_verify_RAID_by_crontab.html[an entire doc], covering a number of controllers with proprietary software as well as the Linux software RAID system http://en.wikipedia.org/wiki/Mdadm[mdadm].
+
+crontab -l:
+--------------------------------------------------------------------
+07  12   *   *   *   cat /proc/mdstat| mutt -s 'PBS1 mdadm check' hmangala@uci.edu
+--------------------------------------------------------------------
+
+==== More sophisticated way of using email/mdadm checking
+
+--------------------------------------------------------------------
+# this is the query command which gives a nice overview of the RAID
+/sbin/mdadm -Q --detail /dev/mdX
+
+# this is the entry for a crontab which would send an email that has an easy
+# to read subject line with details in the email body:
+# (all in one line for a contab entry)
+4   6,20  *   *   *   SUB=`/sbin/mdadm -Q --detail /dev/md0 |grep 'State:'`; \
+ /sbin/mdadm -Q --detail /dev/md0 | mutt -s "DUST RAID: $SUB"  hmangala@uci.edu
+
+
+# if the node has multiple mdadm RAIDs, you can do all at once with:
+05  6,20   *   *   *   SUB=/sbin/mdadm -Q --detail /dev/md0 /dev/md1 \
+ /dev/md2 |grep 'State :' | cut -f2 -d':' | tr '\n' ' ' ; /sbin/mdadm -Q \
+ --detail /dev/md0 /dev/md1 /dev/md2 | mutt -s "BDUC-LOGIN MDADM RAIDs: \
+ $SUB" hmangala@uci.edu
+--------------------------------------------------------------------
+
+==== Assembling a pre-existing RAID on a new OS.
+The problem is that you had a RAID running perfectly on another OS and the system disk dies or had to be replaced for other reasons, or you needed to upgrade it with a bare-metal replacement.  How do you resucitate a pre-existing RAID?  It's very difficult:
+
+--------------------------------------------------------------------
+$ mdadm -A [the-old-array-name]
+  ie:
+$ mdadm -A /dev/md0
+ mdadm: /dev/md0 has been started with 4 drives.
+
+# mdadm queries the system, finds the disks, examines the embedded config info and restarts the RAID as before.
+
+$ cat /proc/mdstat
+Personalities : [raid6] [raid5] [raid4]
+md0 : active raid5 sdb1[0] sde1[4] sdd1[2] sdc1[1]
+      8790400512 blocks super 1.2 level 5, 512k chunk, algorithm 2 [4/4] [UUUU]
+
+--------------------------------------------------------------------
+mdadm is *VERY* smart.
+
+
+==== Prepping an old mdadm array for a new array
+
+
+you have to stop the old array before you can re-use the disks.
+--------------------------------------------------------------------
+mdadm --stop /dev/md_d0 (or whatever the old array is called)
+--------------------------------------------------------------------
+
+and then you can re-use the disks, altho you may have to force mdadm to
+continue to include them into the new array, like this (from 'man mdadm'):
+--------------------------------------------------------------------
+mdadm --create /dev/md0 --level=1 --raid-devices=2 /dev/hd[ac]1
+# Create /dev/md0 as a RAID1 array consisting of /dev/hda1 and /dev/hdc1.
+
+echo 'DEVICE /dev/hd*[0-9] /dev/sd*[0-9]' > mdadm.conf
+mdadm --detail --scan >> mdadm.conf
+--------------------------------------------------------------------
+
+The above will create a prototype config file that describes currently
+active arrays that are known to be made  from  partitions of IDE or
+SCSI drives.  This file should be reviewed before
+being used as it may contain unwanted detail.
+
+==== Replace a disk from an mdadm RAIDX
+
+http://www.clan-elite.info/forum.asp?action=view_thread&id=904[Here's how].
+
+briefly:
+remove the bad partition (in the below example, sdc1), from the RAID:
+--------------------------------------------------------------------
+mdadm --manage /dev/md0 -r /dev/sdc1
+--------------------------------------------------------------------
+
+Then power-off the machine if it doesn't have hot-swap slots and  replace
+the disk (careful about which one it is); always a good idea to test what
+you think is the failed disk with a USB IDE/SATA cable set.
+
+Then power on the machine (mdadm should flash a console message that the
+raid is operating in a degraded state) and once it's up, format the new disk
+like the old disk
+The URL above says you can do it with:
+--------------------------------------------------------------------
+sfdisk -d /dev/sda | sfdisk /dev/sdc
+--------------------------------------------------------------------
+where '/dev/sda' is one of the pre-existing disks and '/dev/sdc' is the new
+disk.  see 'man sfdisk'
+
+If you're going to use fdisk or cfdisk, use disk type 'FD' for
+'Linux RAID AUTODETECT'), and re-add the disk to the RAID with:
+--------------------------------------------------------------------
+mdadm --manage /dev/md0 -a /dev/sdc1
+--------------------------------------------------------------------
+Look at '/proc/mdstat' to check the rebuild status.
+
+
+
+Find the Disk UUIDs for specifying disks in /etc/fstab
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+*Use blkid*.  See below.
+
+While a pain and not intuitive (like /dev/sdc3 is intuitive?), using the disk
+UUIDs will prevent disk order swapping and possible data loss when
+reformatting the disk you thought was '/dev/sdb' and on reboot, turned into
+'/dev/sda'.
+
+ie:
+---------------------------------------------------------------------------
+$ sudo ssh a64-182
+Last login: Tue Oct  9 09:55:45 2012 from bduc-login.bduc
+[root@a64-182 ~]# blkid
+/dev/sda: UUID="d274d4cf-9b09-4ed2-a66d-7c568be7ea45" TYPE="xfs"
+/dev/sdb1: LABEL="/boot" UUID="510f25d0-abee-4cb1-8f1e-e7bccc37d79b" /SEC_TYPE="ext2" TYPE="ext3"
+/dev/sdb2: LABEL="SWAP-sda2" TYPE="swap"
+/dev/sdb3: LABEL="/" UUID="d0d4bc25-3e48-4ee6-8119-9ce54079ee83" /SEC_TYPE="ext2" TYPE="ext3"
+---------------------------------------------------------------------------
+
+==== Label your disks correctly in Ubuntu/Kubuntu
+
+from http://ubuntuforums.org/showthread.php?t=283131[original source]
+
+To list your devices, first put connect your USB device (it does not need to be mounted).
+
+By volume label:
+
+-----------------------------------------------------------------------------
+ls /dev/disk/by-label -lah
+-----------------------------------------------------------------------------
+
+By id:
+
+-----------------------------------------------------------------------------
+ls /dev/disk/by-id -lah
+-----------------------------------------------------------------------------
+
+By uuid:
+
+-----------------------------------------------------------------------------
+ls /dev/disk/by-uuid -lah
+-----------------------------------------------------------------------------
+
+IMO, LABEL is easiest to use as you can set a label and it is human readable.
+The format to use instead of the device name in the fstab file is:
+
+ LABEL=<label> (Where <label> is the volume label name, ex. "data").
+
+ UUID=<uuid> (Where <uuid> is some alphanumeric (hex) like fab05680-eb08-4420-959a-ff915cdfcb44).
+
+Again, IMO, using a label has a strong advantage with removable media (flash drives).
+
+
+
+==== Mount UCI Webfiles as a filesystem
+
+-----------------------------------------------------------------------------
+# hjm still works.
+$ sudo mount -t davfs https://webfiles.uci.edu/hmangala  /home/hjm/webdav
+-----------------------------------------------------------------------------
+
+==== 3ware tw_cli manual...
+... is http://moo.nac.uci.edu/~hjm/3ware_tw_cli_Guide-3-07.pdf[right here in PDF]
+
+==== Mount the NACS file tree via WebDAV
+
+-----------------------------------------------------------------------------
+$ sudo  mount -t davfs https://www.nacs.uci.edu/dav dav
+-----------------------------------------------------------------------------
+
+==== Default Passwords for RAID Controllers
+Areca: BIOS and web interface are set on the controller and are therefore the same for either access mechanism.
+The default login is  'admin' and '0000'.
+
+Interestingly, there is a MASTER password that will allow you to unlock the controller (only at the BIOS level).  Works with the ARC-1110, ARC-1160, ARC-1120, ARC-1160, ARC-1220, and probably many more.  May need to enter #s from the keyboard, not the numeric keypad.
+
+ mno974315743924
+ aaa############ a = alphabet; # = numbers
+
+
+3ware: For the 3DM2 web interface, for both 'User' and 'Admin', it's '3ware'.  Don't know about the BIOS level passwords, if any.  If lost, the password can be reset by stopping the 3dm2 daemons, then copying in a known encrypted password from another system into the right place in the /etc/3dm2/3dm2.conf file and then re-starting the 3dm2 daemons again.
+
+
+
+==== Fixing the 'u?' status when inserting drives in 3ware 9750-controlled arrays
+(Wed Jan 30 PST 2013)
+(Possibly impacts other 3ware arrays as well.) Had this problem recently when some disks previously used in arrays as well as some disks NOT used in arrays were inserted and reported their type as 'u?' when listed by the 'tw_cli' utility.
+
+It should have looks like this when it was sensed by the controller:
+-----------------------------------------------------------------------------
+p43   OK             -    2.73 TB   SATA  -   /c6/e1/slt2  ST3000DM001-9YN166
+-----------------------------------------------------------------------------
+but instead looked like this:
+-----------------------------------------------------------------------------
+p43   OK             u?    2.73 TB   SATA  -   /c6/e1/slt2  ST3000DM001-9YN166
+-----------------------------------------------------------------------------
+
+This implies that it had previously been defined as a unit but could not be recognized as such anymore.
+There is an option that supposedly allows this type of buggered unit to be cleared '[Clear Configuration]' (in the Web GUI, under Management -> Maintenance, at bottom of page).  However in my case, this did not work.  LSI support gave this explanation:
+
+-----------------------------------------------------------------------------
+Assuming that the drive was connected to a 9000 series [it was],  erasing the last 1024 sectors
+would erase the dcb data, You can use dd to do this but please I am not responsible for
+you erasing your data so make sure that you know which drive dd is running on
+
+Ex:   dd if=/dev/zero  of=/dev/sda bs=512 seek=(sector-size-1024) count=1024
+
+replacing sector-size with actual number of the drive.
+
+cat /sys/block/sda/size should show the actual sector numbers.  Replace /dev/sda with actual device ID
+
+The simpler way is reboot and use 3BM (3ware bios manager) to create a spare.
+Press ALT+3 then select the available drive and press s.
+-----------------------------------------------------------------------------
+Obviously, in a production system, you can't bring the system down to play around with the 3BM.  A support ticket has been lodged with LSI about this.
+
+
+.Be careful of what controller you use
+[NOTE]
+==================================================================================
+Because >2TB disks are routinely used for large arrays, and because older disk controllers
+are often incapable of handling the larger partition tables or even the raw devices, be careful of what controller you use to write to such disks.  In my case, I initially used an LSI 1068 SAS controller which blithely went ahead and
+did what I asked, failing to write past 2TB with only a short cryptic message.  I should have asked Mr Google about this before using this disk.  As it turned out, I found an Areca 1110 4-port controller which (with a firmware & BIOS update) did support 3TB disks.
+
+It may help to check with dmesg to see if the whole IO stack agrees on what the disks are:
+-----------------------------------------------------------------------------
+$ dmesg |grep sd[ab] | grep logical
+[    0.902324] sd 2:0:0:0: [sda] 5860533168 512-byte logical blocks: (3.00 TB/2.72 TiB)
+[    0.902487] sd 2:0:0:1: [sdb] 5860533168 512-byte logical blocks: (3.00 TB/2.72 TiB)
+-----------------------------------------------------------------------------
+
+In the end, the approach described by LSI support did work, once the controller could handle a 3TB disk.
+
+==================================================================================
+
+==== Clear a filesystem of gluster cruft to make a new one
+(from http://joejulian.name/blog/glusterfs-path-or-a-prefix-of-it-is-already-part-of-a-volume/[Joe Julian])
+Gluster uses extended attributes to set up the filesystem to perform its magic.  You have to:
+
+- stop the gluster volume
+- delete the gluster volume
+- stop all gluster daemons
+- delete the extended attributes
+- delete the /fs/.glusterfs dir
+
+-----------------------------------------------------------------------------
+# on all gluster server nodes
+VOLNAME=[thevolname]
+gluster volume stop $VOLNAME
+gluster volume delete $VOLNAME
+/etc/init.d/glusterd stop                # on ALL nodes and check that glusterfsd is also stopped
+setfattr -x trusted.glusterfs.volume-id /raid1
+setfattr -x trusted.glusterfs.volume-id /raid2
+setfattr -x trusted.gfid /raid1 /raid2
+rm -rf /raid[12]/.glusterfs
+
+# now it should be clean, so can init a new glusterfs.
+/etc/init.d/glusterd start   # on all nodes
+# following on 'master' node
+gluster volume create nytro transport tcp 10.2.7.15:/raid1 10.2.7.15:/raid2  10.2.7.16:/raid1 10.2.7.16:/raid2
+gluster volume start nytro
+
+-----------------------------------------------------------------------------
+
+Gluster server overload
+^^^^^^^^^^^^^^^^^^^^^^^
+Every once in a while, a gluster server will go into huge overload.  During this time, it will process almost no IO (via ifstat) and therefore it can generally be restarted with few (but not NO) file IO failures.
+
+The following command will restart glusterd and the glusterfsd's that run each brick (on our gluster, there are 2 bricks per server)
+------------------------------------------------------------------------------
+/etc/init.d/glusterd restart
+sleep 15
+ps aux |grep gluster
+------------------------------------------------------------------------------
+
+*BUT* make sure that after the restart, ALL the glusterfsd's are running.  I've done this and only one of two glusterfsd's came up the 1st time. You should see one 'glusterd' and 2 'glusterfsd's'
+
+------------------------------------------------------------------------------
+root     11350  0.1  0.0 252788 11244 ?        Ssl  12:37   0:00 /usr/sbin/glusterd --pid-file=/var/run/glusterd.pid
+root     11360  1.0  0.0 870924 19364 ?        Ssl  12:37   0:02 /usr/sbin/glusterfsd -s localhost --volfile-id gl.bs3.raid1 -p /var/lib/glusterd/vols/gl/run/bs3-raid1.pid -S /tmp/2cdf0105a74654b3d162477dd7e25628.socket --brick-name /raid1 -l /var/log/glusterfs/bricks/raid1.log --xlator-option *-posix.glusterd-uuid=cd8ccc7e-4be9-4df3-8c39-f2d1ce76734b --brick-port 24009 24010 --xlator-option gl-server.transport.rdma.listen-port=24010 --xlator-option gl-server.listen-port=24009
+root     11365  1.9  0.0 737800 23300 ?        Ssl  12:37   0:04 /usr/sbin/glusterfsd -s localhost --volfile-id gl.bs3.raid2 -p /var/lib/glusterd/vols/gl/run/bs3-raid2.pid -S /tmp/eaa9f64862d4967e50adacaf34758850.socket --brick-name /raid2 -l /var/log/glusterfs/bricks/raid2.log --xlator-option *-posix.glusterd-uuid=cd8ccc7e-4be9-4df3-8c39-f2d1ce76734b --brick-port 24011 24012 --xlator-option gl-server.transport.rdma.listen-port=24012 --xlator-option gl-server.listen-port=24011
+------------------------------------------------------------------------------
+
+
+Check with
+
+Generally, files that are in flight or have been marked as written by the controller during this problem may well be lost since the glusterfsd daemons will restart and the IO that they should have processed will be unacknowledged.  On the other hand, to wait to clear all the users and do a smooth total FS shutdown will affect far more users and files.
+
+
+Weird question mark in dir listing
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+this:
+-----------------------------------------------------------------------------
+drwxr-xr-x 108 root      root      12288 2012-04-17 18:38 etc
+d?????????   ? ?         ?             ?                ? gl   <!!!!
+drwxr-xr-x 412 root      root      12288 2012-04-17 14:16 home
+-----------------------------------------------------------------------------
+happens when a dir has been used as a mount point and the mounting device
+has gone awol (in the above case, a gluster volume has been stopped).
+It's disconcerting bc there's no way to tell what has happened.
+
+The solution is to explicitly umount the dir which will magically cause it
+to be fixed:
+
+-----------------------------------------------------------------------------
+# continuing the above example:
+$ umount /gl
+# ls -ld /gl
+drwxr-xr-x 2 root root 4096 2012-03-18 22:14 /gl
+-----------------------------------------------------------------------------
+
+Restarting gluster on the pbs nodes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Because the init scripts are written for RH distros, you can't restart gluster
+with the supplied init script in /etc/init.d/glusterfs
+You have to do this:
+-----------------------------------------------------------------------------
+apt-get install -y daemon
+daemon --pidfile=/var/run/glusterd.pid /usr/sbin/glusterd
+-----------------------------------------------------------------------------
+(correction for pbs1 as of Oct, 2012) - you can start glusterd with the init script - I installed daemon)...
+
+Setting up an XFS filesystem with the correct params
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+XFS is a very good filesystem but can be crippled by inappro parameters.
+The script http://www.mythtv.org/wiki/Optimizing_Performance#XFS-Specific_Tips[mentioned on this page]looks to be very good.
+
+http://www.mythtv.org/wiki/Optimizing_Performance#Further_Information[The script itself is here]
+
+http://www.mysqlperformanceblog.com/2011/12/16/setting-up-xfs-the-simple-edition[and here]
+
+*Also, this:*
+
+If your disks are >1TB with XFS then try:
+  mount -o inode64
+
+This has the effect of sequential writes into the same directory being
+localised next to each other (within the same allocation group). When you
+skip to the next directory you will probably get a different allocation
+group.
+
+'Without this', the behaviour is to:
+
+- stick all the inodes in the first allocation group, and
+
+- stick every file into a random allocation group, regardless of the parent directory
+
+Also, from the fhgfs wiki pages, they recommend using this set of options:
+
+---------------------------------------------------------------------------
+ mount -t xfs  -olargeio,inode64,swalloc,noatime,nodiratime,allocsize=131072k,nobarrier /dev/sdX <mountpoint>
+---------------------------------------------------------------------------
+ where:
+
+- 'allocsize=131072k' for optimal streaming write throughput
+- 'noatime,nodiratime' for not carrying extra, fairly useless attributes in the inode
+- 'nobarrier' - don't wait for write-thru (use writeback if possible)
+- 'largeio' - see 'man mount' - automatically references swidth or allocsize for optimum IO.
+
+This http://www.fhgfs.com/wiki/wikka.php?wakka=StorageServerTuning[page from the FHGFS tuning guide] is very good.
+
+Settings for particular Hardware RAID controllers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+http://xfs.org/index.php/XFS_FAQ#Q._Which_settings_does_my_RAID_controller_need_.3F[This is
+good]
+
+==== Repairing XFS filesystems
+
+http://www.linuxquestions.org/questions/linux-hardware-18/xfs-cannot-read-superblock-521808[From here; very good.]
+
+"First I mounted /dev/hda3 with the option of -o ro,norecovery. Once mounted
+I backed up the data. After i used xfs_repair -L (this last flag destroys
+the log file in order to be remade by xfs_repair use it with care!!).
+Fortunately it recovered the whole partition without loosing any data."
+
+----------------------------------------------------------------------------
+mount -t xfs -r -o no-recovery /dev/sda /data
+# then copy off all the data you can
+# then umount the device
+umount /data
+# then run the very scary
+xfs_repair -L /dev/sda
+# (There's no warning or second chance or 'are you sure'.)
+----------------------------------------------------------------------------
+
+*hjm has used this 3x with success; it has always worked. On all 3 times it
+ was on fairly small (100 GB) filesystems, so for very large filesystems, it may take
+a very long time.*
+
+Set quotas on an XFS filesystem
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+'man xfs_quota' and http://howto.eyeoncomputers.com/linux/xfs-quota-user/[this page]
+
+----------------------------------------------------------------------------
+sudo xfs_quota -x -c 'limit bsoft=0 bhard=0 sw' /data
+----------------------------------------------------------------------------
+
+The 'sw' account no longer has a quota:
+
+< sw           1.4T  50.0G  50.0G  00 [-none-]
+---
+> sw           1.4T      0      0  00 [------]
+
+
+
+
+Clear file cache for testing
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Executed as root, this will have a huge momentary hit on performance since it will cause all the cache for all users and all apps to flush.
+----------------------------------------------------------------------------
+sync && echo 1 > /proc/sys/vm/drop_caches
+# also can use 1, 2, or 3 - mean different things.
+----------------------------------------------------------------------------
+
+The full set (as described in http://www.kernel.org/doc/Documentation/sysctl/vm.txt[the appro kernel doc] is:
+
+	drop_caches
+
+	Writing to this will cause the kernel to drop clean caches, dentries and
+	inodes from memory, causing that memory to become free.
+
+	To free pagecache:
+		echo 1 > /proc/sys/vm/drop_caches
+	To free dentries and inodes:
+		echo 2 > /proc/sys/vm/drop_caches
+	To free pagecache, dentries and inodes:
+		echo 3 > /proc/sys/vm/drop_caches
+
+	As this is a non-destructive operation and dirty objects are not freeable, the
+	user should run `sync' first.
+
+
+
+Reconfig postfix
+^^^^^^^^^^^^^^^^
+----------------------------------------
+sudo dpkg-reconfigure postfix
+----------------------------------------
+
+Missing keys in Debian/Ubuntu
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+To fix the missing key error:
+------------------------------------------
+Fetched 1216kB in 2s (419kB/s)
+Reading package lists... Done
+W: GPG error: http://ppa.launchpad.net hardy Release: The following
+signatures couldn't be verified because the public key is not available:
+NO_PUBKEY 2A8E3034D018A4CE
+------------------------------------------
+
+do this as YOURSELF
+------------------------------------------
+export THEKEY='' # like '2A8E3034D018A4CE' (from above)  or whatever it is
+gpg --keyserver subkeys.pgp.net --recv ${THEKEY}
+gpg --export --armor ${THEKEY} | sudo apt-key add -
+------------------------------------------
+
+To address the matter of GPG errors
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ like:
+------------------------------------------
+W: GPG error: http://download.virtualbox.org lucid Release: The following
+signatures were invalid: BADSIG 54422A4B98AB5139 Oracle Corporation
+(VirtualBox archive signing key) <info@virtualbox.org>
+------------------------------------------
+
+you have to clean out the lists dir and regenerate it.
+------------------------------------------
+apt-get clean
+cd /var/lib/apt
+mv lists lists.old
+mkdir -p lists/partial
+apt-get clean
+apt-get update
+------------------------------------------
+
+
+
+
+
+Networking
+~~~~~~~~~~
+==== Route packets thru dual-homed machine
+
+If you need to route to a remote network via a dual-homed machine, this works for all 'eth0' connected nodes:
+-----------------------------------------------------
+ip route add 192.5.19.0/24 via 10.1.254.196 dev eth0
+-----------------------------------------------------
+
+The above is a temp-only fix; will not work on the next reboot.
+In order to make it permanent, will need to add this:
+
+ 192.5.19.0/24 via 10.1.254.196
+ to 
+ /etc/sysconfig/network-scripts/route-eth0
+
+and/or the reboot image.
+
+Send that to all nodes with clusterfork like this:
+
+-----------------------------------------------------
+cf --target=computeup 'echo "192.5.19.0/24 via 10.1.254.196" >> /etc/sysconfig/network-scripts/route-eth0'
+-----------------------------------------------------
+where 'computeup' is a group designation derived from querying the SGE system as to which hosts report being up.
+
+https://my.esecuredata.com/index.php?/knowledgebase/article/2/add-a-static-route-on-centos[See also]
+
+==== Recursively copy remote dirs w/ commandline
+
+Use 'lftp'
+
+----------------------------------------------------------------------
+lftp sftp://username@analysis.com
+Password:
+lftp username@analysis.com:~> mirror
+# (gets everything)
+----------------------------------------------------------------------
+
+Also can use 'scp'.
+
+==== Recursive wget
+
+Ignoring 'robots.txt (heh)
+-------------------------------------------------------------------
+wget -e robots=off --wait 1 http://your.site.here
+-------------------------------------------------------------------
+See http://codenimbus.com/2010/08/02/override-robots-txt-with-wget/[this link].
+
+==== LDAP lookups at UCI
+'dapper.sh'
+
+[source,bash]
+-------------------------------------------------------------
+#!/bin/bash
+if [ "$1" = "" ]; then
+  bn=`basename $0`
+  echo "Usage:    $bn 'file of UCINETIDs' (one per line)"
+  exit
+fi
+while read USR; do
+    echo "" | tee -a ldap.results
+    echo -n "$USR: " | tee -a ldap.results
+    UU=`ldapsearch -H ldap://ldap.oit.uci.edu:389 -x -b "ou=people,dc=uci,dc=edu" "uid=${USR}"\
+    "displayName" "department" "facultyLevel" "title" \
+    | egrep "^dep"\|"^fac"\|"^ti"\|"^dis" | cut -f2 -d: | tr '\n' ':'`
+    if [ "xx${UU}xx" = "xxxx" ]; then
+        echo -n "no LDAP record" | tee -a ldap.results
+    else
+        echo -n ".."
+        echo -n $UU >> ldap.results
+    fi
+    sleep 0.2
+done < $1
+-------------------------------------------------------------
+and then feed it a file of usernames:
+-------------------------------------------------------------
+./dapper.sh file_of_names
+-------------------------------------------------------------
+
+
+
+==== What is my remote hostname?
+To get your remote name/IP number for entry into an ACL or other such requirement, if you can log into anther host, the command 'last -ad' will give you the perceived name from the remote host's POV - see the last field.
+
+---------------------------------------------------------
+Tue Dec 24 11:01:26 [0.27 0.19 0.16]  hjm@moo:~
+504 $ last -ad
+hjm      pts/18       Tue Dec 24 11:00   still logged in    ip68-109-196-185.oc.oc.cox.net
+...
+---------------------------------------------------------
+
+
+==== How to ssh to a remote Linux PC behind a NAT
+Requires a 'middleman' host (goo) and someone (ctm) at the remote PC.
+
+- have the remote user (ctm) ssh to the middleman host
+
+ ssh -R 10002:localhost:22 ctm@goo.net.some.com
+
+- you ssh to the same host normally
+
+ ssh you@goo.net.some.com
+
+- you use/hijack ctm's ssh session via tunneling
+
+ ssh ctm@localhost -p 10002
+
+In the above line, you are now logging onto the REMOTE PC, so use the appro 'username' for the REMOTE PC, not nec 'ctm' (if the 'ctm' user has the same account name on the REMOTE PC).  You have to have ctm's password on his remote PC or have your own account there already.
+
+Now you're logged into ctm's REMOTE PC even tho it's behind a NAT.
+Original page describing this http://www.marksanborn.net/howto/bypass-firewall-and-nat-with-reverse-ssh-tunnel/[is here].
+
+[[pwlssh]]
+==== passwordless ssh
+Why can't I remember this?
+-----------------------------------------------------------------
+# for no passphrase, use
+ssh-keygen -b 1024 -N ""
+
+# if you want to use a passphrase:
+ssh-keygen -b 1024 -N "your passphrase"
+# but you probably /don't/ want a passphrase - else why would you be going thru this?
+-----------------------------------------------------------------
+
+
+[[fixbrokenx2go]]
+==== How to fix broken 2goserver
+This has come up repeatedly, so here's an attempt to address it.  After x2go has been working OK for a while, a reset/reboot will cause it to fail. Sometimes it's as simple as a hung session, in which case deleting the old x2go session information from your ~/.x2go dir will fix it.  Sometimes it seems that it is much harder - there have been 2 approaches that seem to have fixed it previously
+
+*Missing required dir:*  Check to see if the x2goserver machine still has a /tmp/.X11-unix dir and that it is still chmod'ed OK. It has to be owned by 'root.root'
+----------------------------------------------------------------
+mkdir -p /tmp/.X11-unix
+chown root.root /tmp/.X11-unix
+chmod 1777 /tmp/.X11-unix
+----------------------------------------------------------------
+
+The above has fixed the problem on 2 machines.
+
+*Missing NX libs:*  Don't know if this somehow overlaps with the first solution, but installing all the libNX libs has solved it previously as well.
+----------------------------------------------------------------
+yum install libNX*  # this is probably too many (there are ~60 pf these libs)
+----------------------------------------------------------------
+
+However, it did solve it once.  Try the 1st solution first.
+
+==== x2go problem: 'Cannot establish any listening sockets'
+On CentOS 6.5, we've run int this error:
+
+
+*Error: Aborting session with 'Cannot establish any listening sockets - Make sure an X server isn't already running'.*
+
+The answer seems to be that the packages are placed in the wrong places.  To fix it,
+execute the following as root on the cluster-side machine.
+-------------------------------------------------------
+  mv /usr/libexec/x2go/* /usr/lib64/x2go
+  rm -Rf /usr/libexec/x2go
+  ln -s /usr/lib64/x2go /usr/libexec/x2go
+  service x2gocleansessions start
+  chkconfig x2gocleansessions on
+-------------------------------------------------------
+
+
+==== Monitor wifi signal strength
+Sometimes you want to know what the actual stats are for your wireless signal (new hotspot, testing new antenna, etc.
+The stats are updated continuously in '/proc/net/wireless', so all you have to do is 'watch' them.
+
+--------------------------------------------------------------------
+watch -n 1 cat /proc/net/wireless
+--------------------------------------------------------------------
+
+==== Enabling X11 when sudoing
+
+As the regular user:
+--------------------------------------------------------------------
+hjm@flip:/home/hjm
+$ xauth list
+flip.nac.uci.edu/unix:10  MIT-MAGIC-COOKIE-1 c67b142a7df14f1aa5ed93f4a4e2b660
+--------------------------------------------------------------------
+
+then 'sudo bash' and add that xauth info to root's xauth:
+
+--------------------------------------------------------------------
+root@flip:/home/hjm
+$ xauth add flip.nac.uci.edu/unix:10  MIT-MAGIC-COOKIE-1 c6df14142a75ed93ff1aa7b4a4e2b660
+--------------------------------------------------------------------
+Now it should work.
+
+
+==== Using netcat (nc) to transfer data
+
+Note that this section has been expanded into a full document about http://moo.nac.uci.edu/~hjm/HOWTO_move_data.html[How to Move Data Fast]
+Instead of using *scp* which has an encryption overhead, you can also use
+*nc*.
+
+On the local (sending) host (bongo.nac.uci.edu in this example):
+
+-------------------------------------------------------------------------
+[sending] % pv -pet HG-U133_Plus_2.na26.annot.csv | nc -l -p 1234 <enter>
+-------------------------------------------------------------------------
+
+The command will hang, listening (-l) for a connection from the other end.
+
+on receiving host:
+
+-------------------------------------------------------------------------
+[receiving] % nc bongo.nac.uci.edu 1234 |pv -b >test.file  <enter>
+-------------------------------------------------------------------------
+
+(note: no '-p' on the rec side)
+
+
+How to set up networking on a Ubuntu Ibex system
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+It's fairly well-known that the KDE4 Network Manager is broken.  This is how
+to get networking started on such a machine.
+see
+http://www.ubuntugeek.com/how-to-set-a-static-ip-address-in-ubuntu-810-intrepid-ibex.html[this
+howto] which tells how fairly well.  The following is a quick extract.
+
+Edit  */etc/network/interfaces*
+
+--------------------------------------------------------------------
+auto lo eth0
+ iface lo inet loopback
+ iface eth0 inet static
+ address xxx.xxx.xxx.xxx(enter your ip here)
+ netmask xxx.xxx.xxx.xxx
+ gateway xxx.xxx.xxx.xxx(enter gateway ip here)
+--------------------------------------------------------------------
+
+Edit */etc/resolv.conf*
+
+--------------------------------------------------------------------
+# Generated by NetworkManager
+nameserver xxx.xxx.xxx.xxx(enter your dns server ip)
+nameserver xxx.xxx.xxx.xxx(enter your alt dns server ip)
+--------------------------------------------------------------------
+
+Restart the networking
+
+--------------------------------------------------------------------
+sudo /etc/init.d/networking restart
+--------------------------------------------------------------------
+
+
+And finally, remove the effin broken Network Manager
+--------------------------------------------------------------------
+apt-get remove network-manager network-manager-kde
+--------------------------------------------------------------------
+
+# then install netgo
+--------------------------------------------------------------------
+apt-get install netgo
+--------------------------------------------------------------------
+
+How to set an IP address with ifconfig
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+--------------------------------------------------------------------
+ifconfig ethX 128.200.15.22 netmask 255.255.255.0 broadcast 128.200.15.255 up
+#         if     address    +----- optional (defaults should work -------+
+--------------------------------------------------------------------
+
+BUT!  'ifconfig' is deprecated in favor of the 'ip' command. 
+http://www.techrepublic.com/article/pro-tip-use-the-ip-command-in-favor-of-the-deprecated-ifconfig/[Some examples of using it are here]
+
+especially setting ethernet addresses:
+--------------------------------------------------------------------
+ip link set dev eth0 down         # bring down a dev
+ip -s -s a f to 192.168.10.0/24   # set the address of a dev
+ip link set dev eth0 up            # bring up a dev
+--------------------------------------------------------------------
+
+==== force IB into connected mode
+
+To set the MTU to 64K:
+----------------------------------------------------------------------
+echo connected > /sys/class/net/ib0/mode
+----------------------------------------------------------------------
+
+==== Infiniband kernel modules to load
+Add the following to the initrd, or to the '/etc/modules.conf' file.
+
+--------------------------------------------------------------------
+  rdma_ucm
+  rdma_cm
+  ib_addr
+  ib_ipoib
+  mlx4_core
+  mlx4_ib
+  mlx4_en
+  mlx5_core
+  mlx5_ib
+  ib_uverbs
+  ib_umad
+  ib_ucm
+  ib_sa
+  ib_cm
+  ib_mad
+  ib_core
+  ib_mthca
+--------------------------------------------------------------------
+test with ibstat, ibswitches, etc
+
+==== Bandwidth test via RDMA
+You can test the bandwith of the link using the ib_rdma_bw command.
+
+--------------------------------------------------------------------
+node1# ib_rdma_bw
+ # and then start a client on another node, giving it the hostname of the server.
+node2# ib_rdma_bw  node1
+--------------------------------------------------------------------
+
+
+==== Set up IP forwarding in 4 easy steps.
+http://www.revsys.com/writings/quicktips/nat.html[See here for original page.]
+
+This assumes public interface on eth1; private on eth0 (reverse of usual case).
+
+--------------------------------------------------------------------
+echo 1 > /proc/sys/net/ipv4/ip_forward
+/sbin/iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE
+/sbin/iptables -A FORWARD -i eth1 -o eth0 -m state --state RELATED,ESTABLISHED -j ACCEPT
+/sbin/iptables -A FORWARD -i eth0 -o eth1 -j ACCEPT
+--------------------------------------------------------------------
+This will set up the NAT, but to make it permanent (to survive a reboot), , refer to the page above for full instructions.  This is the short version. You will need to edit '/etc/sysctl.conf' and change the line that says
+
+ net.ipv4.ip_forward = 0
+to
+ net.ipv4.ip_forward = 1
+
+Notice how this is similar to step number one? This essentially tells your kernel to do step one on boot.
+
+Last step for Fedora/RHEL users. In order for your system to save the iptables rules we setup in step two you have to configure iptables correctly. You will need to edit '/etc/sysconfig/iptables-config' and make sure *IPTABLES_MODULES_UNLOAD*, *IPTABLES_SAVE_ON_STOP*, and *IPTABLES_SAVE_ON_RESTART* are all set to 'yes'.
+
+
+SSHouting
+^^^^^^^^^
+Now a separate document: http://moo.nac.uci.edu/~hjm/SSHoutingWithSsh.html[SSHouting with ssh]
+
+Remove the bad RSA/DSA host keys
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+When inititating ssh to a new system or to one which has had significant
+changes made to it to the extent that it refuses your attempts to ssh in,
+you can use this line to delete the offending problem line:
+
+----------------------------------------------------------------------------
+...
+Offending RSA key in /home/hjm/.ssh/known_hosts:325
+  remove with: ssh-keygen -f "/home/hjm/.ssh/known_hosts" -R stunted
+----------------------------------------------------------------------------
+Or just delete the entire '/home/hjm/.ssh/known_hosts' fil - it will just re-populate as you go..
+
+
+Set up a specific gateway for a specific route
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Below example is taken from BDUC:claw9 which needed to have an explicit
+route set to avoid traversing the public net to run MPI applications across
+the split cluster.
+----------------------------------------------------------------------------
+# explicitly set the route for ICS subcluster here
+# (assuming eth0 stays eth0 / 10.255.78.94)
+/sbin/route add -net 10.255.89.0/24 gw 10.255.78.1 dev eth0
+----------------------------------------------------------------------------
+
+==== How to ssh-tunnel a Windows machine
+
+http://www.devdaily.com/unix/edu/putty-ssh-tunnel-firefox-socks-proxy/1-putty-ssh-tunnel-introduction.shtml
+
+
+
+How to tell who's hammering your NFS network
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+1st, figure out which interface is getting hit with ifstat (DO NOT need to be
+root).
+
+----------------------------------------------------------------------------
+$ ifstat
+       eth0                eth1
+ KB/s in  KB/s out   KB/s in  KB/s out
+    2.99   1268.18  80426.50   3629.40
+    4.74    435.89  35832.20   1739.31
+    1.56   2668.27  81236.53   3531.31
+    9.63    899.82  25380.89    707.71
+    1.30   1371.96  70618.32   3184.92
+^C
+----------------------------------------------------------------------------
+OK - it looks like it's eth1 (also will work with IB interfaces).
+
+Now, who's using that bandwidth?
+----------------------------------------------------------------------------
+ $ nfswatch -auth -dev eth1
+
+bduc-login.nacs.uci.edu     Thu May 24 12:45:41 2012   Elapsed time:   00:00:20
+Interval packets:    533769 (network)     349512 (to host)          0 (dropped)
+Total packets:      1077566 (network)     705313 (to host)          0 (dropped)
+                     Monitoring packets from interface eth1
+                     int   pct    total                      int   pct    total
+NFS3 Read          15241    4%    29957 TCP Packets       349266  100%   704793
+NFS3 Write          5401    2%     9914 UDP Packets          239    0%      508
+NFS Read               0    0%        0 ICMP Packets           0    0%        0
+NFS Write              0    0%        0 Routing Control        0    0%        0
+NFS Mount              0    0%        3 Addr Resolution        1    0%        1
+Port Mapper            1    0%        6 Rev Addr Resol         0    0%        0
+RPC Authorization     29    0%       62 Ether/FDDI Bdcst       3    0%        3
+Other RPC Packets    711    0%     1481 Other Packets          6    0%       11
+                                12 authenticators
+Authenticator        int   pct    total Authenticator        int   pct    total
+AUTH_NULL              0    0%        1 ridrogol               6    0%       14
+calvinjs           14122   68%    27563 root                  84    0%      205
+dasher               722    3%     1412 spoorkas             377    2%      779
+jiew5                  2    0%        2 tkim15              3554   17%     6132
+nkp                 1596    8%     3296 tvanerp              197    1%      506
+resteele               1    0%        1 xtian                 62    0%      125
+----------------------------------------------------------------------------
+.. and the display will update every 10s or whatever you set with the '-t' flag
+'<' and '>' in the display will decrease and increase cycle time.
+
+In the above display, it looks like 'calvinjs' is the culprit.
+
+Users and Groups
+~~~~~~~~~~~~~~~~
+
+User and Group ids
+^^^^^^^^^^^^^^^^^^
+----------------------------------------------------------------------------
+$ id hmangala
+uid=7003(hmangala) gid=7003(hmangala)
+groups=7003(hmangala),7434(mortazavi),5001(gpu),5004(psygene),5000(gaussian),7240(dshanthi),5002(charmm),7282(galaxy),5003(vasanlab),115(admin)
+
+$ getent group mortazavi
+mortazavi:!:7434:seyedam,eddiep,rmurad,ricardnr,zengw,hmangala
+----------------------------------------------------------------------------
+NB: 'getent' only greps thru the '/etc/group' file, so if your '/etc/group' is incomplete, it won't return valid info.
+ie: on HPC, the '/etc/group' is only used to declare groups, not to define them (done in '/etc/passwd')
+
+Or even better, use 'lid' or 'lid -g' as root:
+----------------------------------------------------------------------------
+$ lid -g gene
+ mfumagal(uid=928)
+ rkmadduri(uid=930)
+ mtyagi(uid=931)
+ clarkusc(uid=937)
+ fmacciar(uid=787)
+ ftorri(uid=768)
+ bhjelm(uid=1374)
+----------------------------------------------------------------------------
+
+Changing Users group membership
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+if you need to add a group:
+----------------------------------------------------------------------------
+groupadd newgroup
+----------------------------------------------------------------------------
+
+if you need to change group membership of an existing user, 
+'gpasswd' is very useful
+
+----------------------------------------------------------------------------
+gpasswd -d cruz  bio    # deletes cruz from the 'bio' group
+gpasswd -a cruz  som    # adds cruz to the 'som' group
+
+# following also adds a user to an existing group
+usermod -a -G som cruz     # adds cruz to the 'som' group
+
+# and on HPC, have to run:
+ /data/system-files/ge-linux-groups-setup.sh
+to force a sync from the linux groups to the SGE groups to set the Queue permissions.
+
+----------------------------------------------------------------------------
+
+Remove a user completely
+^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------------------------------------------------------------
+userdel user  # removes account - for HPC, only on HPC-S
+
+userdel -r user # removes account and HOME dir
+
+# but on HPC,  still have to remove user dirs on /pub, /bio, /som, etc
+--------------------------------------------------------------------------------
+http://www.computerhope.com/unix/userdel.htm[Webified man page] and 
+http://www.cyberciti.biz/faq/linux-remove-user-command/[some examples].
+
+Force a user to logout
+^^^^^^^^^^^^^^^^^^^^^^
+----------------------------------------------------------------------------
+pkill -KILL -u username
+----------------------------------------------------------------------------
+
+Kerberos init failure on Debian/Ubuntu
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+kerberos requires that the realm be initialized on the node before the
+krb5kdc can start.  If that's not the case, you'll get the unhelpful error:
+*File not found*.
+
+
+Prep a new system for ME
+^^^^^^^^^^^^^^^^^^^^^^^^
+(this is for 'me', Harry Mangalam, and will therefore almost certainly fail
+for anyone else).
+
+DO NOT MOUSE THIS INTO A TERM IN ONE GO.  IT WILL FAIL.
+copy stanza by stanza
+
+----------------------------------------------------------------------------
+host=   # set up the HOSTNAME 1st
+user=hjm # <your_username_on $host>
+ssh-copy-id ${user}@${host}
+
+cd # make sure we're at ~
+ssh  ${user}@${host} 'mkdir -p bin'
+cd bin; scp scut cols ${user}@${host}:~/bin; cd
+scp -r .bashrc .profile .alias.bash .nedit .DirB .bashDirB ${user}@${host}:~
+
+
+# now ssh there and add the missing stuff you'll need
+sudo apt-get install -y joe nedit
+# add yourself to the sudo group
+sudo joe /etc/sudoers
+
+%admin  ALL=NOPASSWD: ALL         # older Debian derivs
+%sudo   ALL=NOPASSWD: ALL         # newer Debian derivs !! not for production machines !!
+
+%wheel  ALL=(ALL)  NOPASSWD: ALL  # RH derivs
+
+# then...
+ssh -t  ${user}@${host} 'sudo apt-get install -y libstatistics-descriptive-perl gconf2' # for scut
+# or if it's a RH-based system
+# ssh -t  ${user}@${host} 'sudo yum -y install perl-Statistics-Descriptive.noarch gconf2'
+
+#NB: 'yum repolist' will list all the repos active:
+----------------------------------------------------------------------------
+
+
+
+=== Bash tips and tricks
+
+==== Read a file line by line
+
+[source,bash]
+------------------------------------------------------------------
+filename=myinput.txt  # or just feed it in explicitly
+while read line   # string of newline-terminated ends up in $line
+do
+    # Do what you want to $line
+done < $filename
+
+# next line takes a file of fully qualified filenames and produces the basename in 'less'
+(while read line; do basename $line; done) < fastq.gz.names | less
+
+------------------------------------------------------------------
+See https://goo.gl/PYSfkH[here] for more exposition.
+
+
+==== Backtics vs $(expression)
+
+A user asked why a bash expression would work from the commandline but not inside backtics:
+
+[source,bash]
+-------------------------------------------------------------------------
+$ grep rs somefile | awk -F\\t ' { print $2 } ' | awk -F\_ ' { print $1 } ' | grep -v rs | sort | uniq
+#  note the backslashes    ^^                           ^
+
+# above cmd produced: 
+mnp 
+psy 
+seq 
+seq2 
+seq3 
+seq4 
+unp
+
+but the version that uses backtics did not:
+$ a=`grep rs somefile | awk -F\\t ' { print $2 } ' | awk -F\_ ' { print $1 } ' | grep -v rs | sort | uniq`
+$ echo $a
+(nothing)
+
+# however using the $() variant:
+$ a=$(grep rs somefile | awk -F\\t ' { print $2 } ' | awk -F\_ ' { print $1 } ' | grep -v rs | sort | uniq)
+
+# produces:
+$ echo $a
+mnp psy seq seq2 seq3 seq4 unp
+-------------------------------------------------------------------------
+
+The explanation from Garr:
+
+Both of these http://stackoverflow.com/questions/9449778/what-is-the-benefit-of-using-instead-of-backticks-in-shell-scripts[first two main responses] are interesting: 
+ 
+The first speaks to $() helping with nesting.  The second speaks to all the backslashes necessary with back-ticks.
+
+==== filename processing
+Bash is a horrible language for anything other than job control (and it's not great at 
+that), but it can be made to do crude regex and string processing in the pursuit of 
+filename modification.
+
+*Modifying the prefix and suffix of filenames*
+
+- rename files beginning with 'ChrM_' to the rest of  the filename, ie deleting the ‘chrM_’ prefix from all files.
+
+[source,bash]
+------------------------------------------------------------------------
+prefix="ChrM_"
+lenprefix=${#prefix}  # note the format: ${#string} -> length of string
+for II in ${prefix}*; do 
+  echo -n "$II -> "; 
+  chopped=${II:5}; # uses the character offset reference
+  echo "$chopped"; 
+  # mv $II $chopped;  # this does the actual renaming. 
+                      # uncomment when you're sure it works correctly
+done
+------------------------------------------------------------------------
+
+- do the same thing as above, but *recursively*.
+
+[source,bash]
+------------------------------------------------------------------------
+shopt -s globstar         # sets the recursive bash search 
+prefix="asfiw"            # assign to a var to make it more portable
+lenprefix=${#prefix}      # get the length of the prefix
+for II in **/${prefix}*; do   # now will search recursively
+# !! BUT the string that gets returned is NOT the simple filename anymore, but
+# !! the relative filepath, so you have to break it apart into the 
+# !! PATH and the FILENAME
+# use 'basename' and 'dirname'
+# !! WARNING:  will fail if the filename has spaces in it.
+  echo -n "$II -> "
+  fpath=`dirname $II` # the file
+  fn=`basename $II`
+  choppedfn=${fn:${lenprefix}}; # uses the character offset reference
+  # now glue the path and the chopped filename back together again
+  fpn=${fpath}/${choppedfn}
+  echo "$fpn"; 
+  # mv $II $fpn;  # this does the actual renaming. 
+                      # uncomment when you're sure it works correctly
+done
+------------------------------------------------------------------------
+
+
+- rename all files ending in ‘.bam_MT.bam.bai’ , to ‘*.bai’.
+
+[source,bash]
+------------------------------------------------------------------------
+# same thing but counts backwards thru the filename string
+suffix="bam_MT.bam.bai"
+newsuff="bai"
+lensuff=${#suffix}                # note the format
+for II in *${suffix}; do 
+  echo -n "$II -> "; 
+  len=${#II};
+  let lenfilename="$len - $lensuff"  # actual arithmetic in bash
+  chopped=${II:0:$lenfilename}; # uses the character offset reference 
+  newfilename="${chopped}${newsuff}"
+  echo $newfilename
+  # mv $II $newfilename;  # this does the renaming. uncomment when you're 
+                          # sure it works correctly
+done
+------------------------------------------------------------------------
+
+
+
+
+==== numfmt
+numfmt can process multiple fields with field range specifications similar to 
+cut, and supports setting the output precision with the --format option
+
+See the http://goo.gl/j7Vfqw[StackExchange post]
+
+==== bash printf idiocy
+
+#!/bin/bash
+
+----------------------------------------------------------------------------
+cat /etc/passwd | grep data | awk -F: {'print $1"@uci.edu", $1, $5'} |
+while read EMAIL USER FULLNAME ; do
+printf "$USER%6s\t$FULLNAME\n"
+done
+
+
+Output:
+emecaalv       Esteban Meca Alvarez
+valdesp       Phoebe H. Valdes
+xiaoxias       Xiaoxia Shi
+tcwong1       Timothy Chong Ji Wong
+----------------------------------------------------------------------------
+
+
+==== Find identical lines in a file
+
+----------------------------------------------------------------------------
+fgrep -x -f file1 file2
+
+# ie:
+
+$ fgrep -x -f ManifestDF1.md5sums.sort 03Feb2013.OK.md5sums.sort
+09C100248.bam   fe1fa429b9a3249648dda22acfc5231c
+10C107613.bam   0643e8c112e8ad6d710114f4882a8d9e
+MH0128100.bam   56b7d19d2b4ad0badfd15081b4e55674
+MH0131639.bam   54c3c71368720bbcbe8361daf369c6f6
+
+# perfect!
+----------------------------------------------------------------------------
+
+or 'comm'
+
+----------------------------------------------------------------------------
+comm [-1] [-2] [-3 ] file1 file2
+-1 Suppress the output column of lines unique to file1.
+-2 Suppress the output column of lines unique to file2.
+-3 Suppress the output column of lines duplicated in file1 and file2.
+
+# ie
+
+$ comm -1 -2 ManifestDF1.md5sums.sort 03Feb2013.OK.md5sums.sort
+09C100248.bam   fe1fa429b9a3249648dda22acfc5231c
+10C107613.bam   0643e8c112e8ad6d710114f4882a8d9e
+MH0128100.bam   56b7d19d2b4ad0badfd15081b4e55674
+MH0131639.bam   54c3c71368720bbcbe8361daf369c6f6
+
+----------------------------------------------------------------------------
+
+'join' does a similar thing but adds the fields together and doesn't check identicality
+'scut' can do this as well but takes a little more futzing.
+
+
+==== Display all the terminal colors in a screen
+For example if you want to get snazzy with shell or programmatic prompts..
+
+----------------------------------------------------------------------------
+for i in $(seq 0 10 256); do for j in $(seq 0 1 9); do n=$(expr $i + $j); \
+[ $n -gt 256 ] && break || echo -ne "\t\033[38;5;${n}m${n}\033[0m"; done; echo; done
+----------------------------------------------------------------------------
+
+==== How to grep for OR'ed terms
+
+How many instances of 'this' or 'that' (case insensitive) are in this whole directory
+tree?
+
+----------------------------------------------------------------------------
+grep -rin  "this\|that" * |wc
+----------------------------------------------------------------------------
+
+How to filter terms in a grep search via OR
+----------------------------------------------------------------------------
+# following filters out lines that contain 'DROPPED' or 'ntpd' or 'dhcpd'
+grep -v 'DROPPED\|ntpd\|dhcpd' /var/log/syslog |less
+# or
+egrep "relative error|tstep, maxcr=        4000" somefile
+----------------------------------------------------------------------------
+
+
+==== How to query for word globs or regexes in SQLite
+
+----------------------------------------------------------
+sqlite> select * from pcinfo where hostname like "bong%";
+2|2|128.200.34.111|bongo.nac.uci.edu|4|1|1|0
+45|16|128.200.84.8|bongo.nacs.uci.edu|4|1|1|0
+
+sqlite>  select * from owner  where userid like "ps%";
+29|Pegah|Sattari|psattari@uci.edu|0|psattari@uci.edu|uciuser@uci.edu|(949)
+231-9908|backupaccount|2009-01-20
+
+----------------------------------------------------------
+
+and delete them:
+
+----------------------------------------------------------
+sqlite> delete from pcinfo where hostname like "bong%";
+
+sqlite> delete from owner where userid like "ps%";
+----------------------------------------------------------
+
+
+==== Change the root password on a MYSQL (V5) server
+
+This is sort of grunty, but it has always worked, unlike many of the
+previous methods listed on the http://dev.mysql.com/doc/refman/5.0/en/resetting-permissions.html[appro MySQL page]
+
+
+Alternatively, on any platform, you can set the new password using the mysql
+client(but this approach is less secure):
+ Stop mysqld and restart it with the *--skip-grant-tables* --user=root* options
+(Windows users omit the --user=root portion).
+Connect to the mysqld server with this command:
+
+-----------------------------------------------------------------------------
+ shell> mysql -u root
+-----------------------------------------------------------------------------
+
+Issue the following statements in the mysql client:
+
+-----------------------------------------------------------------------------
+ mysql> UPDATE mysql.user SET Password=PASSWORD('newpwd')
+    ->                   WHERE User='root';
+ mysql> FLUSH PRIVILEGES;
+-----------------------------------------------------------------------------
+
+ Replace *newpwd* with the actual root password that you want to use.
+ You should be able to connect using the new password.
+
+
+
+==== Differences between /etc/bashrc, /etc/profile, .bashrc, .profile, etc:
+
+http://www.linuxquestions.org/questions/linux-general-1/etcprofile-v.s.-etcbashrc-273992/[Look here]
+
+==== correct sort behavior requires setting locale
+Otherwise it can be all wonky.  ALWAYS set this in your .bashrc
+--------------------------------------------------------------------------
+export LC_ALL=C
+--------------------------------------------------------------------------
+
+==== Background jobs inside a bash loop
+
+Have to place the background job inside braces or parens, like this:
+
+--------------------------------------------------------------------------
+for f in *z; do { echo "copying $f"; cp $f /gl/hmangala/tdlong & } ; done
+
+for ITER in $(echo {a..z}); do (cp -a ${ITER}* /gl/hmangala/ & ) done
+--------------------------------------------------------------------------
+
+
+==== Capture timing to a file
+
+Use the /usr/bin/time command and use the -a -o flags:
+--------------------------------------------------------------------------
+/usr/bin/time -p -a -o lstime ls -lR nacs > lsout
+--------------------------------------------------------------------------
+The above appends the timing info into 'lstime' while capturing the output
+of the 'ls -lR' command into 'lsout'.  If appending (-a) don't forget to
+echo a newline into the file between interations.
+
+==== Timing background jobs
+
+the trick is to put the background commands in a file and end the file with 'wait' which will wait until all the child background jobs spawned in that process end.
+
+The example below starts 10 background jobs writing to a filesystem as part of a benchmark.
+--------------------------------------------------------------------------
+#!/bin/bash
+ROOT=/lsi;
+H=`hostname`;
+SPATH=${ROOT}/hmangala/${H}
+mkdir -p ${SPATH};
+    echo -n "$H : Loadavg: "
+    cat /proc/loadavg;
+for II in $(seq 1 10); do
+    dd if=/dev/zero of=${SPATH}/out${II} bs=1M count=2K &
+done
+sync
+wait
+--------------------------------------------------------------------------
+The shell script above is called with clusterfork:
+
+--------------------------------------------------------------------------
+cf --tar=c3up 'time  /data/hpc/bin/multi-dd.sh'
+--------------------------------------------------------------------------
+which spawns the jobs on the 'c3up group (9 nodes) so that all 9 are writing 10 streams of data to the filesystem which is a decent load for the filesystem.
+
+
+
+==== Fix problems with nxclient
+
+With completely FUBAR connections:
+
+-----------------------------------------------------------------------------
+sudo killall -u nx # should kill all nx-related processes
+# then (for neatx sessions)
+cd  /var/lib/neatx/sessions
+rm -rf *  # or all dirs that seem to be hung
+-----------------------------------------------------------------------------
+
+
+
+==== primitive crontab system loadchecker
+
+crontab -l:
+--------------------------------------------------------------------------
+*/5  *  *   *   *    /home/hmangala/bin/loadchecker.pl
+--------------------------------------------------------------------------
+
+Set and loop thru an array with bash
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+----------------------------------------------------------------------------
+#!/bin/bash
+IP_ARRAY=("106.51.107.164" "109.161.229.120" "117.18.231.29" "121.243.33.212")
+# note the array spec above and the reference format below.  If the elements
+# were integers or even floats(?), wouldn't need the "" (I think).
+
+for i in ${IP_ARRAY[@]}; do
+	echo "$i = "
+	nslookup ${i} | grep "name ="| scut -f 1 -d '=' | uniq
+    echo "==============="
+done
+----------------------------------------------------------------------------
+
+
+Iterate thru lists in bash
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------------------------------------------------------------
+list='a64-112 a64-120 a64-129 a64-178 claw2 claw3 claw4 n121'
+for hj in $list; do
+  echo $hj
+done
+
+# also the famous ITER:
+for ITER in $(seq -f "%03g" 1 140); do echo A64HOST=a64-${ITER}; done
+for ITER in $(echo {p..q}); do time rsync -a $ITER*  /h; done
+
+# to nest padded and unpadded ITERs:
+for UNPAD in $(seq 1 10) ; do
+  PAD=$(printf  "%03g" "$UNPAD")
+  echo "A64HOST${UNPAD}=a64-${PAD}"
+done
+
+-----------------------------------------------------------------------------
+
+
+Disappear the grotacious error messages from KDE, java, etc
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To make the streaming error messages from konqueror, java, etc go to
+/dev/null, append the following to the application call:
+
+------------------------------------------------------------------------------
+$ application >& /dev/null &
+#             ^^^^^^^^^^^^^
+------------------------------------------------------------------------------
+
+
+==== Using find to identify old files
+
+---------------------------------------------------------
+find /path/to/start -maxdepth 5 -mtime +183
+---------------------------------------------------------
+where -maxdepth 5 is the levels of dirs to query and -mtime +183 is the
+filter to pass if you're searching fo rfiles older than 183 days (~ half a
+yr.)  If you want files YOUNGER than that, use '-183'.  Useful for creating
+a stream of file names to include or exclude.
+
+==== More 'find' examples
+See http://www.linux.com/learn/tutorials/316404-10-tips-for-using-gnu-find[this page] for good examples.
+
+
+==== How to recursively rename files
+
+---------------------------------------------------------
+# this substitutes a '_' for all spaces in file names.
+# if you don't add the trailing 'g' in the regex, only
+# the 1st space gets replaced.
+
+find . -name  *\ * -print0 | rename  's/\ /_/g'
+---------------------------------------------------------
+
+The '-print0' option to find maintains spaces and most other internal
+unusual characters (but not parens ()).  To have *rename* NOT do the rename
+but only show you what will happen (always a good idea), use the '-n' flag
+
+NB: Also see the Linux-Mag series *Filenames by design*.
+
+ * http://www.linux-mag.com/id/7251[Part 1]
+ * http://www.linux-mag.com/id/7171[Part 2]
+ * http://www.linux-mag.com/id/7194[Part 3]
+
+==== complex rules with *find* 
+'find' is a great utility, but it's an effing brute to figure out how to
+do complex searches.  Here's an example of how to use it to search for:
+
+- zero sized files (any name, any age)
+- file that have the suffix '.fast[aq]', .'f[aq]', '.txt', '.sam', 'pileup', '.vcf'
+- but only if those named files are older than 90 days (using a bash variable to 
+pass in the '90')
+
+The '-o' acts as the 'OR' logic and the '-a' acts as the 'AND' logic.
+Note how the parens and brackets have to be escaped.
+------------------------------------------------------------
+DAYSOLD=90
+find .  -size 0c \
+	-o \( \
+	\( -name \*.fast\[aq\] \
+	-o -name \*.f\[aq\]  \
+	-o -name \*.txt  \
+	-o -name \*.sam  \
+	-o -name \*pileup \
+	-o -name \*.vcf \) \
+	-a -mtime +${DAYSOLD} \
+	-a -maxdepth 6 \
+	-a -type d\)
+
+find .  -maxdepth 6 \
+   -a -size 0c \
+   -o  \( \( -name \*.fast\[aq\] \
+   -o -name \*.f\[aq\]  \
+   -o -name \*.txt  \
+   -o -name \*.sam  \
+   -o -name \*pileup \
+   -o -name \*.vcf \) \
+   -a -mtime +${DAYSOLD} \
+   -a -type d \)
+   
+# find all files larger than 100MB
+find . -type f -size +100M
+
+------------------------------------------------------------
+
+==== How to use 'screen'
+
+http://aperiodic.net/screen/quick_reference[Good cheat sheet here]
+
+Screen commands
+~~~~~~~~~~~~~~~
+- 'screen' - start the screen session
+- C-a n - create a new screen
+- C-a A - name the session
+- C-a n - next screen
+- C-a p - Previous screen
+- C-a R - re-connect to a lost session  (multi-attach by adding an -x )
+- C-a " - list all screen sessions
+- C-a _ - monitor for silence
+- C-a M - monitor for output
+- C-a D - detach from session
+- C-a [ - start copy text
+  (cursor to where you want to start, hit spacebar
+  move to the end of the copy section and hit spacebar again to finish the
+  copy
+- C-a ] - pastes whatever's in the buffer.
+
+
+
+SGE tips and tricks
+-------------------
+=== qstat status characters
+
+See https://hpc.oit.uci.edu/HPC_USER_HOWTO.html#_sge_qstat_state_codes[SGE status codes]
+
+
+=== Remove SGE users
+
+---------------------------------------------------------
+# removes USER as well as removes the USER from any SGE groups in
+# 
+qconf -duser USER  
+qconf -du USER listname
+---------------------------------------------------------
+
+Change all Q instances at once
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*man qmod*
+---------------------------------------------------------
+# change all Q instances running on compute-3-1 back to enabled.
+$ qmod -e *@compute-3-1
+Queue instance "asom@compute-3-1.local" is already in the specified state: enabled
+Queue instance "free64@compute-3-1.local" is already in the specified state: enabled
+Queue instance "ctnl@compute-3-1.local" is already in the specified state: enabled
+---------------------------------------------------------
+
+*Disable all Qs on a node*
+---------------------------------------------------------
+$ qmod -d *@compute-3-9
+root@hpc-s.local changed state of "free64@compute-3-9.local" (disabled)
+root@hpc-s.local changed state of "asom@compute-3-9.local" (disabled)
+root@hpc-s.local changed state of "som@compute-3-9.local" (disabled)
+---------------------------------------------------------
+
+
+
+Fix qmon font errors
+~~~~~~~~~~~~~~~~~~~~
+http://hpcprogrammer.com/fix-qmon-and-those-annoying-font-errors[See here]
+
+---------------------------------------------------------
+# on Mint/Debian/Ubuntu
+sagi xfonts-100dpi xfonts-100dpi-transcoded xfonts-75dpi xfonts-75dpi-transcoded
+xset +fp  /usr/share/fonts/X11/100dpi/
+xset +fp  /usr/share/fonts/X11/75dpi/
+xset fp rehash
+# ! ta daaaaaa!
+
+# or if that doesn't work, this has worked recently:
+
+cd /usr/share/fonts/X11/100dpi/
+sudo mkfontdir
+xset fp+ /usr/share/fonts/X11/100dpi
+# add the path permanently..
+echo "FontPath /usr/share/fonts/X11/100dpi" >> ~/.xinitrc
+---------------------------------------------------------
+
+
+
+
+Generate a list of user SGE jobs to feed to qdel
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------------------------------------------------
+$ kill_list=`qstat -u [user] |cut -f1 -d' ' |grep -v '\-' |  tr '\n' ' '`
+1450169 1450166 1455492 1455493 1455494 1455495 1455496 1455497 1455498
+1455499 1455500 1455501 1455502 1455503 1455504 1455506 1455507 1455508
+1455509 1455511 1455512 1455513 1455514 1455515 1455516 1455518 1455519
+1455520 1455521 1455522 1455523 1455524 1455525 1455527 1455528 1455529
+1455530 1455531 1455533 1455534 1455535 1455536 1455538 1455539 1455540
+1455541 1455542 1455543
+
+# and then, finish them off with:
+$ qdel $kill_list
+------------------------------------------------------------------------------
+
+SGE Commandline docs from Oracle
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+http://docs.oracle.com/cd/E24901_01/doc.62/e21978/management.htm[Right here]
+
+
+
+Programming
+-----------
+
+=== Set cmake installation dir
+See https://goo.gl/5QbG1Q[this StackOverflow thread].
+
+Short version is:
+-----------------------------------------------------------
+cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr
+-----------------------------------------------------------
+
+=== MATLAB HOWTOs
+
+==== Check MATLAB license status
+To check the usage status of the campus license pool:
+
+------------------------------------------------------------------------------
+module load MATLAB # load the MATLAB module; sets up the env vars
+
+$MATLAB/bin/glnxa64/lmutil lmstat -a -c 1711@seshat.nacs.uci.edu
+#                                      (port@license-server)
+
+# Please include the above line in your qsub scripts if you're using
+# MATLAB to make sure the license server is online.
+
+# you can check more specifically by then grepping thru the output.
+# For example to find the status of the Distributed Computing Toolbox licenses:
+
+$MATLAB/bin/glnxa64/lmutil lmstat -a -c 1711@seshat.nacs.uci.edu | grep Distrib_Computing_Toolbox
+------------------------------------------------------------------------------
+
+=== C HOWTOs
+==== Convert a static lib into a shared one
+You can convert the static version of of library into a dynamic version by doing the following:
+------------------------------------------------------------------------------
+ar -x libsomename.a
+gcc -shared -fpic -o libsomename.so *.o
+------------------------------------------------------------------------------
+
+
+=== R HOWTOS
+
+Replaced with
+http://moo.nac.uci.edu/~hjm/AnRCheatsheet.html[entire posting about R and BioConductor].
+
+=== Update all existing R packages
+
+The following will traverse ALL existing R packages and update them if they need it.
+Requires the full development set.  Depending on your set of installed packages, this
+may be a very long (overnight) process.
+
+--------------------------------------------------
+> update.packages(ask = FALSE, dependencies = c('Suggests'))
+--------------------------------------------------
+
+=== Re-install all previous packages in latest version of R
+see http://stackoverflow.com/questions/2169118/installing-all-cran-packages-that-are-not-already-installed[this stackoverflow question].
+
+Essentially..
+
+- in the old version of R...
+- obtain the names of all previous packages
+- save them into a variables
+- quit the old version of R, saving your workspace
+- start new version of R, restoring variables
+- use 'install.packages()' to install all the ones that were in the old one.
+- easy peasy
+
+------------------------------------------------------------------------------
+# start old version of R; get names of installed packages
+packs <- installed.packages()
+exc <- names(packs[,'Package'])
+
+# now quit old version of R, saving workspace
+
+# now 'module load R/newversion'
+# R      # starts new R, reads workspace
+ls() # verify that you have the list of packages to install
+install.packages(exc,dependencies=TRUE)  # this will take a VERY long time to run; do it overnight..
+------------------------------------------------------------------------------
+
+==== "R CMD INSTALL" mods
+
+
+Here's the example for 'Rmpi'.  Note the format for passing in the configure
+options.
+------------------------------------------------------------------------------
+R CMD INSTALL --configure-vars='LIBS=-L/apps/openmpi/1.4.2/lib' \
+--configure-args="--with-Rmpi-type=OPENMPI \
+--with-Rmpi-libpath=/apps/openmpi/1.4.2/lib \
+--with-mpi=/apps/openmpi/1.4.2 \
+--with-Rmpi-include=/apps/openmpi/1.4.2/include" \
+Rmpi_0.5-9.tar.gz
+------------------------------------------------------------------------------
+
+==== Installing packages from within R
+
+The following will download, compile and install (with all the dependencies)
+any existing R package (and point to a http (vs https) repo as well.
+------------------------------------------------------------------------------
+# as root if installing for whole platform
+$ R
+...
+
+# NOTE: it's "configure-vars" in the 'outside-R' commandline above, but "configure.vars" in the 'inside R' version
+> install.packages("<R package name>", dependencies = TRUE, repos="http://cran.cnr.Berkeley.edu",
+configure.vars='LIBS=-L/apps/openmpi/1.4.2/lib')
+# eg:
+install.packages("ggplot2", dependencies=TRUE)
+install.packages("BiodiversityR", dependencies=TRUE)
+
+------------------------------------------------------------------------------
+https://stat.ethz.ch/R-manual/R-devel/library/utils/html/install.packages.html[Also 
+see the docs]
+
+
+BioConductor can be installed like:
+------------------------------------------------------------------------------
+> source("http://bioconductor.org/biocLite.R")
+ ...
+> biocLite()
+# more at http://www.bioconductor.org/install/
+------------------------------------------------------------------------------
+
+and install individual BioC packages, use:
+------------------------------------------------------------------------------
+# to install both "GenomicFeatures" and "AnnotationDbi"
+>BiocManager::install(c("GenomicFeatures", "AnnotationDbi"))
+------------------------------------------------------------------------------
+
+
+=== Perl HOWTOs
+
+==== cpanm
+A much easier way to install perl modules...
+
+BUT:  make sure you set 
+
+------------------------------------------------------------------------------
+export PERL_MM_OPT=""
+------------------------------------------------------------------------------
+
+Otherwise 'cpanm' will install the new modules wherever 'PERL_MM_OPT' is set to (and it will probably not be in the 
+*\@INC* path, so other perl modules can't find it. Sheesh.  Wasted an hour on this..
+
+
+==== Install a bunch of modules at once:
+Generate s list of module names, 'test.modules' below and feed thru xargs and then into cpan.
+----------------------------------------------------
+./test.modules |grep fail|cut -f2 -d" "|xargs -I {} cpan {}
+----------------------------------------------------
+
+
+==== Debug a regex using only Perl
+Use Perl's built-in debugger.  ie:
+
+----------------------------------------------------
+perl -Mre=debug -e'"gagctagggcatgtagc"=~/g{0,3}c[at]{2}g[at]./'
+# paste into a shell to see what it gives you.
+----------------------------------------------------
+
+Or use a http://gskinner.com/RegExr/[web-based debugger]
+
+
+==== How to quickly find descriptions of perl functions
+Instead of googling about trying to find the right one or paging thru the 10K lines of *man perlfunc*, you can jump right to the right one with:
+
+----------------------------------------------------
+perldoc -f [the function]
+----------------------------------------------------
+
+Usefully, this also works with the file tests:
+
+----------------------------------------------------
+perldoc -f '-e'
+----------------------------------------------------
+
+==== How to extend Perl's @INC lib path
+
+<http://www.perlhowto.com/extending_the_library_path>
+
+
+==== Using SQLite from Perl
+
+See http://tinyurl.com/6yckw8[the CaRtalk forums entry] or look at the http://moo.nac.uci.edu/~hjm/recursive.filestats.sqlite_skel.pl[example Perl Script].
+
+
+==== Simple line-by-line processing in Perl
+
+--------------------------------------------------
+# from STDIN
+while (<>) {
+	[insert processing here]
+}
+--------------------------------------------------
+
+---------------------------------------------------------
+# from a file, similar syntax, but with the file handle
+open (FH, "<$filename") or die "Can't open the file";
+while (<FH>) {
+	[insert processing here]
+}
+---------------------------------------------------------
+
+==== Perl's 'select()'
+
+If you need to send output to different files or streams, define them all
+beforehand and then use select() to select among them. ie:
+
+----------------------------------------------------------------------------
+#!/usr/bin/perl -w
+open LOG, ">>test.log";
+print "This should go to STDOUT (the console)\n";
+select (LOG);
+print "Now this should go to the log\n";
+print "Now this should append to the log\n";
+select (STDOUT);
+print "This should now go to STDOUT (back to the console)\n";
+----------------------------------------------------------------------------
+
+
+==== The Perl one-liner replace
+
+----------------------------------------------------------------------------
+perl -e 's/replacethis/withthis/gi' -p -i.bak [in these files]
+----------------------------------------------------------------------------
+
+You can also use other delimiters if the patterns strings contain slashes:
+
+----------------------------------------------------------------------------
+perl -e 's%/this/path/to/file%/with/this/path/to/file%gi' -p -i.bak [in these files]
+----------------------------------------------------------------------------
+
+or to be anal about it:
+-----------------------------------------------------------------------
+find . -name '*.html' -print0 | xargs -0 perl -pi -e \
+'s/oldstring/newstring/g'
+-----------------------------------------------------------------------
+the 'find -print0' prevents filenemes with spaces from screwing
+things up as long as you use the matching '-0' in the xargs cmd.
+
+*Garr adds:*
+
+The example below is useful because we have to do the "#!/usr/bin/perl" 
+first-line replacement so often:
+
+-----------------------------------------------------------------------
+perl -e 's{^\#\!/usr/bin/perl( +\-W)?}{#!/usr/bin/env  perl}g' -p -i.bak *.pl
+-----------------------------------------------------------------------
+
+But it's also cute for two reasons:
+
+* It handles cases where there 'could' be a "-W" after "/usr/bin/perl"
+* It uses open-and-close braces "{}" as the delimiters, which I find 
+easier to read than a single delimiter symbol like "%".  This trick 
+works with other open-and-close characters, like braces "[]", too.
+
+
+=== Python HOWTOs
+
+==== Force a recompile of a pip-installed package from git
+
+Example (khmer) to reinstall from the original git distribution.
+
+---------------------------------------------
+pip install --upgrade --force-reinstall --no-binary all --no-deps git+git://github.com/dib-lab/khmer.git
+---------------------------------------------
+
+Further, Edward adds:
+
+. "--upgrade" is required for "--force-reinstall" (which is a weird design...)
+. Because of #1, if you want to install a specific version, use "package_name==1.2.3" instead of "package_name"
+. "--no-binary all" enforces compiling from source for specified package and all its dependencies
+. "--no-deps" disables dependency tracking, which is very useful when recompiling. Without it, the mandatory "--upgrade" parameter will try reinstall / upgrade all dependencies.
+. Git url is supported by pip, which is better to use if you don't need to patch source code.
+. "git+git://github.com/dib-lab/khmer.git" is how you have to format the url. If it's a git via https url (which is recommended to use nowadays), then it would be "git+https://github.com/dib-lab/khmer.git". But obvious our enthought_python has some problem with HTTPS that it never works.
+
+
+==== Modify the Python setup.py Makefile
+This is a bastard of a thing to figure out.  The 'setup.py' file defines a bunch of files that needs to be processed internally and the 'Makefile' also defines a bunch of envvars that are OVERWRITTEN (not appended to) envvars that are defined in the SHELL.  So you often get conflicting or missing choices if the 'python setup.py build' command fails.
+
+You can modify all the envvars in one place by editing the Python-version-dependent 'setup.py' Makefile which is typically found in
+-------------------------------------------------
+$PYTHON_ROOT/lib/pythonX.Y/config/Makefile
+-------------------------------------------------
+This contains most of the envvars that need to be modified to allow for a successful compile/install.
+
+==== Simple line-by-line processing in Python
+
+
+extracted from http://python.about.com/od/simplerscripts/qt/fanalysisbyline.htm[about.com]
+
+-------------------------------------------------
+fileIN = open(sys.argv[1], "r")
+line = fileIN.readline()
+
+while line:
+	[some bit of analysis here]
+	line = fileIN.readline()
+-------------------------------------------------
+
+
+==== Execute a system command in Python
+
+The code will execute the command but not caputure the output.  For that see
+the next HOWTO.  You can/should embed it in a try:/except: clause to make
+sure that it worked as expected.
+
+----------------------------------------------------
+import os
+
+cmd = 'ls -l /usr/bin'
+try:
+    os.system(cmd)
+except:
+    print "ERR:[%s] did not complete successfully!"
+----------------------------------------------------
+
+
+==== Read a system command output into Python list
+
+
+----------------------------------------------------------------------------
+from commands import getoutput
+syscmd = "system command text"
+sysoutput = []
+sysoutput = getoutput(syscmd).split("\n")
+# sysoutput is now a list of output lines split on newlines
+----------------------------------------------------------------------------
+
+==== ipython debugging in a python script
+
+NB: this may no longer be the case - I think the ipython debug shell syntax may have changed recently...
+
+----------------------------------------------------------------------------
+        9 import IPython
+       10 IPython.embed()
+	...
+       45    for k in range(options.kmin, options.kmax+options.kstep, options.kstep):
+       46       IPython.embed() # <----- !!! will break into an ipython shell
+       47        p = subprocess.Popen(['velvetg','%s_%i' % (options.directoryRoot, k), '-read_trkg', 'yes'],
+       48        output = p.communicate()
+----------------------------------------------------------------------------
+
+
+Autoconf, Make, Compiler tips
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+git hints
+^^^^^^^^^
+To cleanup a git repo, you need two commands:
+----------------------------------------------------------------------------
+git reset --hard	# this will reset all changed files
+git clean -dfx		# this will remove all untracked files
+----------------------------------------------------------------------------
+
+In case it has submodules, add two more commands to cleanup submodules:
+
+----------------------------------------------------------------------------
+git submodule foreach git reset --hard
+git submodule foreach git clean -dfx
+----------------------------------------------------------------------------
+
+
+'configure --help' options
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+These are from R's configure, among the most elaborate I've seen. Not all of
+these are used in all configure systems.
+----------------------------------------------------------------------------
+Some influential environment variables:
+  R_PRINTCMD  command used to spool PostScript files to the printer
+  R_PAPERSIZE paper size for the local (PostScript) printer
+  R_BATCHSAVE set default behavior of R when ending a session
+  MAIN_CFLAGS additional CFLAGS used when compiling the main binary
+  SHLIB_CFLAGS
+              additional CFLAGS used when building shared objects
+  MAIN_FFLAGS additional FFLAGS used when compiling the main binary
+  SHLIB_FFLAGS
+              additional FFLAGS used when building shared objects
+  MAIN_LD     command used to link the main binary
+  MAIN_LDFLAGS
+              flags which are necessary for loading a main program which will
+              load shared objects (DLLs) at runtime
+  CPICFLAGS   special flags for compiling C code to be turned into a shared
+              object.
+  FPICFLAGS   special flags for compiling Fortran code to be turned into a
+              shared object.
+  FCPICFLAGS  special flags for compiling Fortran 95 code to be turned into a
+              shared object.
+  SHLIB_LD    command for linking shared objects which contain object files
+              from a C or Fortran compiler only
+  SHLIB_LDFLAGS
+              special flags used by SHLIB_LD
+  DYLIB_LD    command for linking dynamic libraries which contain object files
+              from a C or Fortran compiler only
+  DYLIB_LDFLAGS
+              special flags used for make a dynamic library
+  CXXPICFLAGS special flags for compiling C++ code to be turned into a shared
+              object
+  SHLIB_CXXLD command for linking shared objects which contain object files
+              from the C++ compiler
+  SHLIB_CXXLDFLAGS
+              special flags used by SHLIB_CXXLD
+  SHLIB_FCLD  command for linking shared objects which contain object files
+              from the Fortran 95 compiler
+  SHLIB_FCLDFLAGS
+              special flags used by SHLIB_FCLD
+  TCLTK_LIBS  flags needed for linking against the Tcl and Tk libraries
+  TCLTK_CPPFLAGS
+              flags needed for finding the tcl.h and tk.h headers
+  MAKE        make command
+  TAR         tar command
+  R_BROWSER   default browser
+  R_PDFVIEWER default PDF viewer
+  BLAS_LIBS   flags needed for linking against external BLAS libraries
+  LAPACK_LIBS flags needed for linking against external LAPACK libraries
+  LIBnn       'lib' or 'lib64' for dynamic libraries
+  SAFE_FFLAGS Safe Fortran 77 compiler flags for e.g. dlamc.f
+  r_arch      Use architecture-dependent subdirs with this name
+  DEFS        C defines for use when compiling R
+  JAVA_HOME   Path to the root of the Java environment
+  R_SHELL     shell to be used for shell scripts, including 'R'
+  YACC        The `Yet Another C Compiler' implementation to use. Defaults to
+              the first program found out of: `bison -y', `byacc', `yacc'.
+  YFLAGS      The list of arguments that will be passed by default to $YACC.
+              This script will default YFLAGS to the empty string to avoid a
+              default value of `-d' given by some make applications.
+  CC          C compiler command
+  CFLAGS      C compiler flags
+  LDFLAGS     linker flags, e.g. -L<lib dir> if you have libraries in a
+              nonstandard directory <lib dir>
+  LIBS        libraries to pass to the linker, e.g. -l<library>
+  CPPFLAGS    (Objective) C/C++ preprocessor flags, e.g. -I<include dir> if
+              you have headers in a nonstandard directory <include dir>
+  CPP         C preprocessor
+  F77         Fortran 77 compiler command
+  FFLAGS      Fortran 77 compiler flags
+  CXX         C++ compiler command
+  CXXFLAGS    C++ compiler flags
+  CXXCPP      C++ preprocessor
+  OBJC        Objective C compiler command
+  OBJCFLAGS   Objective C compiler flags
+  XMKMF       Path to xmkmf, Makefile generator for X Window System
+  FC          Fortran compiler command
+  FCFLAGS     Fortran compiler flags
+
+Use these variables to override the choices made by `configure' or to help
+it to find libraries and programs with nonstandard names/locations.
+----------------------------------------------------------------------------
+
+Personal/Roaming tips and tricks
+--------------------------------
+=== Reset sound in chrome browser when it garbles in video playback
+---------------------------------------------------------------
+pulseaudio --kill
+---------------------------------------------------------------
+
+That's it.
+
+=== How to restore kmail and google-chrome settings after a crash
+
+kmail keeps its setting in '~/.kde/share/config/kmailrc'.  Since kmail is almost always open, it will not have written its config back to kmailrc and the file will be quite truncated.
+If you have the foresight to make a backup of a good kmailrc, then just copy it back over the bad one.  If you didn't make a backup, you'll have to go in and retype all the account info.
+
+You can import all the filters again from a previous file tho by using the 'Import' button on the filters pane.
+
+=== reset Plama Shell
+Includes the application panel.
+---------------------------------------------------------------
+killall plasmashell
+kstart plasmashell
+---------------------------------------------------------------
+
+=== How to avoid being sniffed at public WIFI hotspots
+
+
+To set up an ssh tunnel to shield against wireless sniffing (to check
+email securely when using a public access non-WEP/WAP access point), use the -L
+flag agin, but remapping port 110:
+
+ssh -L 2110:pop.west.cox.net:110 moo.nac.uci.edu
+
+the above line establishes a tunneled connection via moo.nac.uci.edu to port
+110 on pop.west.cox.net using localhost port 2110 (has to be above 1024 for
+regular users to be able to use it).  But you do have to configure your mail
+client to use localhost:2110 instead of pop.west.cox.net:110 as your mail
+server.
+
+Slightly inconvenient, but better than having your password sniffed.
+
+
+=== How to use ssh as a VPN or SMTP proxy
+
+
+==== Browser VPN
+
+
+The vpn for your browser is very simple.  In your shell, define the proxy port:
+
+-----------------------------------------------------------------------------
+$ ssh -D 1111 user@remote host.
+-----------------------------------------------------------------------------
+
+then config your browser to use the proxy port you just set (localhost port 1111)
+
+For Firefox (on Linux anyway), the click path is as follows:
+
+  Firefox -> Preferences -> Advanced -> Network tab -> Connection [Settings]
+    change the Proxy from "Direct connection to the Internet"
+    to: Manual Proxy configuration
+ and set the SOCKS host to *localhost port 1111*
+ (o)SOCKS_v5 setting is checked/clicked.
+
+==== SMTP settings
+
+
+To send mail thru UCI's server when far afield, you have to tunnel/port forward to a host that will then forward to the usual smtp host.
+
+for example, to use uci's smtp server while away,  first ssh to <yourUCIhost> with the following command:
+
+-----------------------------------------------------------------------------
+ssh -L 2025:smtp.uci.edu:25 <yourUCIhost>.uci.edu
+-----------------------------------------------------------------------------
+
+this port-forwards localhost's port 2025 to port 25 on smtp.uci.edu via a ssh to
+<yourUCIhost>.uci.edu, which is on the uci net.
+
+In this case I also have to configure kmail to send a null hostname to uci and also to check what the server supports for authentication protocol.
+
+This should also work for bonk to use the cox smtp server, tho the kmail
+specifics may vary.  This should NOT require any setup of an smtp server on
+bonk or sand or anything else. ie:
+
+-----------------------------------------------------------------------------
+ssh -L 2025:smtp.west.cox.net:25 ibonk
+-----------------------------------------------------------------------------
+
+-L [bind_address:]port:host:hostport
+
+
+
+== Misc
+
+=== How to put a Bluetooth Plantronics 510 into pairing mode
+Press call button and Volume UP at the same time until LED starts to blink
+blue and red.
+
+=== Reboot 'dabrick' after an grub error
+
+Error 5: Partition table invalid or corrupt.
+
+The problem stems not from a bad disk but from the different ways that the
+BIOS, Grub, and the OS interact.  Now that disk interfaces include IDE,
+SATA, SCSI, USB, Firewire, etc, it's harder for the OS to decide what to use
+as a boot disk.  Grub tries to make a good guess at what this should be, but
+often fails, especially after a major upgrade that may overwrite custom
+mapping files.  This is what happened in the most recent reboot failure.
+grub allows you to fix this on the fly by allowing you to temporarily edit
+the boot parameters and booting on those (ephemeral - doesn't get written to
+disk) settings.  If you don't edit the files once you've booted up, when you
+reboot, the old bad ones are re-read from disk and you'll get the same
+errors again.  Condemned to repeat the past, etc.
+
+
+The way to temporarily get booting again is:
+ * halt the boot process in the grub menu.
+ * hilite the appropriate line and press 'e' to edit it.  This will show a screen of several lines, each one of which can be edited by cursoring to it and pressing 'e' again.
+ * correct the mistake (usually by changing the disk ID to the right one:
+   root   (hd2,0)
+     should be
+   root   (hd0,0)
+     and hit <Enter>, NOT <Esc>
+* now you're back at the 1st screen and you can boot this entry by hitting 'b'
+* this will *NOT* write the corrected entry to the disk, so when the system has booted, edit  */boot/grub/menu.lst* and correct the entry in there as well.
+
+After Upgrade remember to test:
+ * mail/mutt
+ * apache - after reboot and remount big partitions
+ * trac/svn - after reboot and remount big partitions
+ * mounting big partitions and map to /boot/grub/device.map
+ * NFS exports, but have to re-read the NFS mounts from BDUC
+ * replace the /etc/X11/xorg.conf file with the working one from backup.
+       X1 works but is at default rez.
+ * java (install Java 6)
+ * can we change fstab to mount the sda/sdb correctly? Can try using 'blkid' to generate the UUIDs for fstab.
+ * check /boot/grub/menu.lst again - changed during install again. Yes, with the current
+     settings it boots as it's supposed to:
+
+ hjm@dabrick:~
+502 $ cat /boot/grub/device.map
+(hd0)   /dev/sdc
+(hd1)   /dev/sda
+(hd2)   /dev/sdb
+
+dmesg finds 3ware 1st (also in BIOS scan) and would guess that 3ware -> sda and Areca is sdb
+
+!! THIS IS CORRECT
+Yes.  3ware / sda -> /data when we reboot successfully!!
+      areca / sdb -> /bduc
+      boot    sdc -> /, /home
+
+test after mounts.  /data has the BackupPC dir
+                    /bduc has apps, Modules dirs
+
+
+=== Clean the nozzles of a HP 5850 inkjet
+
+VERY simple (when it works).  Refill the cartridge to just LESS than
+overflowing (if you fill it full, it will leak).  Replace, then run:
+
+-----------------------------------------------------------------------------
+$ hp-clean
+-----------------------------------------------------------------------------
+This will probe the local network to find an HP printer, then initiate the
+cleaning routine. It primes the cartridge very well, avoiding the need to
+run 20 pages of paper thru it.  Obviously, if you have multiple inkjets on
+that network, you should specify which one.
+
+hp-clean --help # for help
+hp-clean -p<printer_name>
+ ie hp-clean -php5850-ok
+
+
+
