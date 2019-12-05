@@ -4,7 +4,21 @@ Harry Mangalam <harry.mangalam@uci.edu>
 v1.27, Jan 30, 2019
 :icons:
 
+ifdef::env-github[]
+:imagesdir: asc-images/
+:toc:
+:toc-placement!:
+toc::[]
+endif::[]
+
+// GENERATE HTML OUTSIDE OF GITHUB
 // fileroot="/home/hjm/FF/HOWTOS"; asciidoc -a icons -a toc2 -a toclevels=3 -b html5 -a numbered ${fileroot}.txt;  scp ${fileroot}.html ${fileroot}.txt  moo:~/public_html
+
+// SET UP THE ASCIIDOC SRC FOR GITHUB
+// cd ~/gits/mangodocs;  git add HOWTOS.* README.md; git commit -m 'commit message'; git push
+
+# check github for bug reports.
+
 
 
 //This should be organized into sections, like
