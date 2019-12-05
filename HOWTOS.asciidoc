@@ -1,5 +1,4 @@
-Harry's HOWTOs
-==============
+= Harry's HOWTOs
 Harry Mangalam <harry.mangalam@uci.edu>
 v1.27, Jan 30, 2019
 :icons:
@@ -24,7 +23,7 @@ toc::[]
 // SET UP THE ASCIIDOC SRC FOR GITHUB
 // cd ~/gits/mangodocs;  git add HOWTOS.* README.md; git commit -m 'commit message'; git push
 
-# check github for bug reports.
+// check github for bug reports.
 
 
 
